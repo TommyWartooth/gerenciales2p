@@ -46,7 +46,7 @@ const slides = [
     bg: '/imagenes/villazon2.jpg',
     texto: '"Desde el primer bocado hasta el postre, todo fue impecable. La presentación es una obra de arte y cada sabor tiene intención. El chef logra que lo tradicional se sienta contemporáneo. Sin duda, uno de los mejores restaurantes de comida boliviana en La Paz."',
     foto: '/imagenes/JoseFoto.jpeg',
-    nombre: 'Jose Rodriguez de Rojas',
+    nombre: 'Jose Rodriguez de Mamani',
   },
   {
     bg: '/imagenes/cochebomba.jpg',
@@ -56,7 +56,7 @@ const slides = [
   },
   {
     bg: '/imagenes/lapaz.jpg',
-    texto: '"Cada plato llegaba con una historia. El camarero nos explicó el origen de los ingredientes y se notaba la pasión del equipo. El ceviche de trucha estaba fresco, equilibrado. El ambiente es elegante, íntimo, con música suave que no interfiere en la conversación."',
+    texto: '"Cada plato llegaba con una historia. El camarero nos explicó el origen de los ingredientes y se notaba la pasión del equipo. El Wallake estaba fresco, equilibrado. El ambiente es elegante, íntimo, con música suave que no interfiere en la conversación."',
     foto: '/imagenes/DonGay.jpeg',
     nombre: 'Alfonso Gumucio',
   },

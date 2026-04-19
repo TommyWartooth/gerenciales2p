@@ -3,7 +3,7 @@
     <div class="navbar__inner">
 
       <a href="#inicio" class="navbar__logo">
-        <img src="/monito.jpg" alt="Logo" class="navbar__logo-img" />
+        <img src="/icono.png" alt="Logo" class="navbar__logo-img" />
       </a>
 
       <ul class="navbar__links" :class="{ 'navbar__links--open': menuOpen }">
