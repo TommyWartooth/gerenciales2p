@@ -2,24 +2,47 @@
   <nav class="navbar">
     <div class="navbar__inner">
 
-      <a href="#inicio" class="navbar__logo">
+      <!-- Logo -->
+      <router-link to="/" class="navbar__logo" @click="closeMenu">
         <img src="/monito.jpg" alt="Logo" class="navbar__logo-img" />
-      </a>
+      </router-link>
 
+      <!-- Links -->
       <ul class="navbar__links" :class="{ 'navbar__links--open': menuOpen }">
-        <li><a href="#inicio"   @click="scrollTo('inicio')">Inicio</a></li>
-        <li><a href="#carta"    @click="scrollTo('carta')">Carta</a></li>
-        <li><a href="#nosotros" @click="scrollTo('nosotros')">Sobre Nosotros</a></li>
-        <li><a href="#contacto" @click="scrollTo('contacto')">Contacto</a></li>
+        <li>
+          <router-link to="/" @click="closeMenu">Inicio</router-link>
+        </li>
+        <li>
+          <router-link to="/carta" @click="closeMenu">Carta</router-link>
+        </li>
+        <li>
+          <router-link to="/nosotros" @click="closeMenu">Sobre Nosotros</router-link>
+        </li>
+        <li>
+          <router-link to="/contacto" @click="closeMenu">Contacto</router-link>
+        </li>
       </ul>
 
+      <!-- Auth -->
       <div class="navbar__auth">
-        <a href="#" class="navbar__auth-link">Log In</a>
-        <a href="#" class="navbar__auth-link">Sign Up</a>
-        <a href="#carta" class="navbar__cta" @click.prevent="scrollTo('carta')">Pedir Ahora</a>
+        <router-link to="/login" class="navbar__auth-link">Log In</router-link>
+        <router-link to="/register" class="navbar__auth-link">Sign Up</router-link>
+
+        <button 
+          class="navbar__cta"
+          @click="abrirPedido"
+        >
+          Pedir Ahora
+        </button>
       </div>
 
-      <button class="navbar__burger" @click="toggleMenu" :class="{ open: menuOpen }" aria-label="Menú">
+      <!-- Burger -->
+      <button 
+        class="navbar__burger" 
+        @click="toggleMenu" 
+        :class="{ open: menuOpen }" 
+        aria-label="Menú"
+      >
         <span></span>
         <span></span>
         <span></span>

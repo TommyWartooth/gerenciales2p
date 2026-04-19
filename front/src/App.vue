@@ -1,41 +1,31 @@
-<template>
-  <div id="app">
-    <Navbar />
-    <Topbar />
 
-    <main>
-      <Herosection />
-      <SideOfrecemos/>
-      <Ofertasection />
-      <SideSliderPlatos />
-      <SideDestacable />
-      <SideComentarios />
-      <SideMapa/>
-      <Footersection />
-    </main>
-  </div>
+<template>
+<Topbar />
+<Navbar />
+
+<router-view />
+<FooterSeccion />
+
 </template>
 
 <script setup>
-import Topbar from './components/layout/Topbar.vue'
 import Navbar from './components/layout/Navbar.vue'
-import Footersection from './components/layout/Footersection.vue'
-import Herosection from './components/home/Herosection.vue'
-import Ofertasection from './components/home/Ofertasection.vue'
-import SideSliderPlatos from './components/home/SideSliderPlatos.vue'
-import SideComentarios from './components/home/SideComentarios.vue'
-import SideMapa from './components/home/SideMapa.vue'
-import SideOfrecemos from './components/home/SideOfrecemos.vue'
-import SideDestacable from './components/home/SideDestacable.vue'
+import Topbar from './components/layout/Topbar.vue'
+import FooterSeccion from './components/layout/FooterSeccion.vue';
 </script>
 
-<style>
+
+<style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;700&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+body {
+  background-color: #110f0d;
 }
 
 #app {
@@ -68,7 +58,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Jost', sans-serif;
-  background-color: var(--black);
+  
   color: var(--white);
   overflow-x: hidden;
 }
