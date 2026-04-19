@@ -1,8 +1,7 @@
 
 <template>
-<Topbar />
 <Navbar />
-
+<Topbar />
 <router-view />
 <FooterSeccion />
 
