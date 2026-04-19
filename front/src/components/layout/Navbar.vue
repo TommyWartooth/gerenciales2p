@@ -4,7 +4,7 @@
 
       <!-- Logo -->
       <router-link to="/" class="navbar__logo" @click="closeMenu">
-        <img src="/monito.jpg" alt="Logo" class="navbar__logo-img" />
+        <img src="/icono.png" alt="Logo" class="navbar__logo-img" />
       </router-link>
 
       <!-- Links -->
