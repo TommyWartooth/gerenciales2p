@@ -39,7 +39,7 @@
       <!-- Burger -->
       <button 
         class="navbar__burger" 
-        @click="toggleMenu" 
+        @click="pedidoPanel.abrir" 
         :class="{ open: menuOpen }" 
         aria-label="Menú"
       >
@@ -50,18 +50,28 @@
 
     </div>
   </nav>
+
+  
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, inject } from 'vue'
+import { pedidoPanel } from '../../stores/pedidoPanel'
+
 
 const menuOpen = ref(false)
-const toggleMenu = () => (menuOpen.value = !menuOpen.value)
-const scrollTo = (id) => {
-  menuOpen.value = false
-  const el = document.getElementById(id)
-  if (el) el.scrollIntoView({ behavior: 'smooth' })
+
+const toggleMenu = () => {
+  menuOpen.value = !menuOpen.value
 }
+
+const closeMenu = () => {
+  menuOpen.value = false
+}
+
+const abrirPedido = () => {
+  pedidoPanel.abrir();
+};
 </script>
 
 <style scoped>
