@@ -257,11 +257,12 @@
 import { computed, ref, getCurrentInstance, onMounted, onUnmounted } from "vue";
 import { pedidoPanel } from "../../stores/pedidoPanel";
 
-import BebidasSection from "./sectionsPedido/BebidasSection.vue";
-import PlatosSection from "./sectionsPedido/PlatosSection.vue";
-import EntradasSection from "./sectionsPedido/EntradasSection.vue";
-import PostresSection from "./sectionsPedido/PostresSection.vue";
-import DatosEntregaSection from "./sectionsPedido/DatosEntregaSection.vue";
+import EntradasSection from "../pedidos/SeccionesPedido/SeccionEntradas.vue";
+import PlatosSection from "../pedidos/SeccionesPedido/SeccionPlatos.vue";
+import PostresSection from "../pedidos/SeccionesPedido/SeccionPostres.vue";
+import BebidasSection from "../pedidos/SeccionesPedido/SeccionBebidas.vue";
+import DatosEntregaSection from "../pedidos/SeccionesPedido/DatosEntregaSeccion.vue";
+
 const HORA_CIERRE = 22; // 10pm
 const HORA_APERTURA = 8; // 8am
 
@@ -361,7 +362,8 @@ onMounted(() => {
 .pedido-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(5, 10, 25, 0.9);
+  background: rgba(17, 15, 13, 0.88);
+  backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -372,13 +374,14 @@ onMounted(() => {
 .pedido-panel {
   width: min(1000px, 100% - 2rem);
   max-height: 90vh;
-  background: #0b1720; /* azul verdoso oscuro */
+  background: var(--black-soft);
+  
   color: #f9fafb;
   overflow-y: auto;
   border-radius: 16px;
   padding: 1.25rem 1.75rem;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
-  border: 2px solid rgba(15, 23, 42, 0.9);
+  border:1px solid var(--gold-dim);
 }
 
 /* HEADER */
@@ -420,16 +423,16 @@ onMounted(() => {
 /* Tabs del header */
 .pedido-tabs {
   display: inline-flex;
-  background: rgba(15, 23, 42, 0.7);
+  background:var(--wine-dark);
   border-radius: 999px;
   padding: 3px;
-  border: 1px solid rgba(234, 179, 8, 0.35); /* dorado suave */
+  border:1px solid var(--gold-dim); /* dorado suave */
 }
 
 .tab-btn {
   border: none;
   background: transparent;
-  color: #e5e7eb;
+  color:var(--white);
   font-size: 0.85rem;
   font-weight: 600;
   padding: 0.3rem 0.8rem;
@@ -438,15 +441,25 @@ onMounted(() => {
   transition: background 0.15s ease, color 0.15s ease;
 }
 
-.tab-btn--active {
-  background: linear-gradient(135deg, #4b5d2a, #9a7c2f);
-  color: #0b1720;
+.tab-btn--active{
+  background: linear-gradient(
+    135deg,
+    #5B1E2D 0%,   /* vino profundo */
+    #8C3B3B 30%, /* terracota rojiza */
+    #945932 65%, /* cobre andino */
+    #87432e 100% /* ocre dorado */
+  );
+
+  color: white;
 }
+
+
 
 /* Botón de cerrar */
 .btn-cerrar {
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  background: rgba(15, 23, 42, 0.85);
+  border:1px solid var(--gold-dim);
+  background:var(--wine-dark);
+  
   color: #e5e7eb;
   font-size: 1rem;
   line-height: 1;
@@ -461,7 +474,7 @@ onMounted(() => {
 }
 
 .btn-cerrar:hover {
-  background: rgba(30, 64, 175, 0.9);
+  background:var(--wine-light);
 }
 
 .btn-cerrar:active {
@@ -509,7 +522,7 @@ onMounted(() => {
 .carrito-box {
   border-radius: 12px;
   padding: 0.9rem 0.9rem;
-  background: rgba(15, 23, 42, 0.7);
+  background: rgba(61, 17, 30, 0.7);
   border: 1px solid rgba(15, 23, 42, 0.9);
   min-height: 150px;
   display: flex;
@@ -579,7 +592,7 @@ onMounted(() => {
 .campo-control {
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.8);
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(61, 17, 30, 0.7);
   color: #f9fafb;
   padding: 0.35rem 0.7rem;
   font-size: 0.85rem;
@@ -679,7 +692,7 @@ onMounted(() => {
 .carrito-item {
   padding: 0.4rem 0.5rem;
   border-radius: 8px;
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(61, 17, 30, 0.7);
   border: 1px solid rgba(55, 65, 81, 0.7);
   position: relative;
   padding-left: 3.5rem; /* espacio para la X */
@@ -767,7 +780,7 @@ onMounted(() => {
 .menu-tabs {
   display: inline-flex;
   flex-wrap: wrap;
-  background: rgba(15, 23, 42, 0.7);
+  background: rgba(61, 17, 30, 0.7);
   border-radius: 999px;
   padding: 4px;
   border: 1px solid rgba(148, 163, 184, 0.5);
@@ -788,8 +801,15 @@ onMounted(() => {
 }
 
 .menu-tab-btn--active {
-  background: linear-gradient(135deg, #4b5563, #eab308);
-  color: #0b1720;
+  background: linear-gradient(
+    135deg,
+    #5B1E2D 0%,   /* vino profundo */
+    #8C3B3B 30%, /* terracota rojiza */
+    #945932 65%, /* cobre andino */
+    #87432e 100% /* ocre dorado */
+  );
+
+  color: white;
 }
 
 /* Responsivo simple */

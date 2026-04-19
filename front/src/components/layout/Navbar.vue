@@ -476,6 +476,18 @@ const registrar = () => {
 }
 .modal-input-fecha label { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.3rem; display: block; }
 
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.8rem;
+}
+.checkbox-label a { color: var(--gold-dim); }
+.checkbox-label input { accent-color: var(--wine); }
+
 .foto-perfil-box {
   display: flex;
   flex-direction: column;
@@ -518,17 +530,6 @@ const registrar = () => {
   color: var(--gold);
   background: rgba(235,205,149,0.05);
 }
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin-bottom: 0.8rem;
-}
-.checkbox-label a { color: var(--gold-dim); }
-.checkbox-label input { accent-color: var(--wine); }
 
 @media (max-width: 600px) {
   .form-grid { grid-template-columns: 1fr; }

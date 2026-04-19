@@ -3,14 +3,27 @@
 <Navbar />
 <Topbar />
 <router-view />
+
+<PedidoPanel
+  :carrito="carrito"
+  @confirmar-bebida="agregarAlCarrito"
+  @eliminar-item="eliminarDelCarrito"
+  @guardar-datos="manejarGuardarDatos"
+/>
+
 <FooterSeccion />
 
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
 import Navbar from './components/layout/Navbar.vue'
 import Topbar from './components/layout/Topbar.vue'
-import FooterSeccion from './components/layout/FooterSeccion.vue';
+import FooterSeccion from './components/layout/FooterSeccion.vue'
+import PedidoPanel from './components/pedidos/PedidoPanel.vue'
+
+
 </script>
 
 
