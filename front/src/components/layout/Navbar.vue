@@ -37,7 +37,7 @@
             </div>
           </div>
 
-        <a href="#carta" class="navbar__cta" @click.prevent="scrollTo('carta')">Pedir Ahora</a>
+          <a class="navbar__cta" @click.prevent="pedidoPanel.abrir()">Pedir Ahora</a>
         </div>
 
         <!-- BURGER -->
@@ -116,6 +116,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { pedidoPanel } from '../../stores/pedidoPanel'
 
 // ── Nav ──────────────────────────────────────────────
 const menuOpen = ref(false)
@@ -126,7 +127,7 @@ const scrollTo = (id) => {
   if (el) el.scrollIntoView({ behavior: 'smooth' })
 }
 
-// ── Auth (estado local — conectar al store cuando esté el back) ──
+// ── Auth (UI only — conectar al store cuando esté el back) ──
 const estaAutenticado = ref(false)
 const nombreUsuario   = ref('')
 
@@ -158,12 +159,12 @@ const abrirRegistro = () => {
   mostrarUserMenu.value = false
 }
 
-//como UI d momento
+// ── Login (UI only) ───────────────────────────────────
 const documento = ref('')
 const password  = ref('')
 
 const login = () => {
-  //conectar al back
+  // TODO: conectar al back
   estaAutenticado.value = true
   nombreUsuario.value   = documento.value || 'Usuario'
   mostrarLogin.value    = false
@@ -177,6 +178,7 @@ const cerrarSesion = () => {
   mostrarUserMenu.value = false
 }
 
+// ── Registro (UI only) ────────────────────────────────
 const regNombre      = ref('')
 const regApellido    = ref('')
 const regEmail       = ref('')
@@ -200,7 +202,7 @@ const onFotoSeleccionada = (e) => {
 
 const registrar = () => {
   if (!aceptaTerminos.value) { alert('Debes aceptar los términos y condiciones'); return }
-  //conectar con backend
+  // TODO: conectar con backend
   alert('¡Cuenta creada! (modo demo — conectar al back pronto)')
   mostrarRegistro.value = false
   mostrarLogin.value    = true
@@ -476,18 +478,6 @@ const registrar = () => {
 }
 .modal-input-fecha label { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.3rem; display: block; }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin-bottom: 0.8rem;
-}
-.checkbox-label a { color: var(--gold-dim); }
-.checkbox-label input { accent-color: var(--wine); }
-
 .foto-perfil-box {
   display: flex;
   flex-direction: column;
@@ -530,6 +520,18 @@ const registrar = () => {
   color: var(--gold);
   background: rgba(235,205,149,0.05);
 }
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.8rem;
+}
+.checkbox-label a { color: var(--gold-dim); }
+.checkbox-label input { accent-color: var(--wine); }
 
 @media (max-width: 600px) {
   .form-grid { grid-template-columns: 1fr; }
