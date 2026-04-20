@@ -25,7 +25,6 @@
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-// Importación de componentes de layout
 import Navbar from './components/layout/Navbar.vue'
 import Topbar from './components/layout/Topbar.vue'
 import FooterSeccion from './components/layout/FooterSeccion.vue'
@@ -33,7 +32,6 @@ import PedidoPanel from './components/pedidos/PedidoPanel.vue'
 
 const route = useRoute()
 
-// Lógica para detectar si ocultamos los elementos comunes
 const esVistaPanel = computed(() => {
   const path = route.path || ''
   return path.startsWith('/admin') || path.startsWith('/recepcionista')
@@ -42,12 +40,33 @@ const esVistaPanel = computed(() => {
 // Gestión del Carrito
 const carrito = ref([])
 
-const agregarAlCarrito = (item) => {
-  carrito.value.push(item)
+const agregarAlCarrito = (nuevoItem) => {
+
+  const itemExistente = carrito.value.find(item => 
+    item.id === nuevoItem.id && item.comentario === nuevoItem.comentario
+  );
+
+  if (itemExistente) {
+   
+    itemExistente.cantidad += nuevoItem.cantidad;
+    
+    itemExistente.subtotal = itemExistente.cantidad * itemExistente.precio;
+    
+    console.log(`Actualizada cantidad de ${itemExistente.nombre} a ${itemExistente.cantidad}`);
+  } else {
+   
+    carrito.value.push(nuevoItem);
+    console.log(`Agregado nuevo ítem: ${nuevoItem.nombre}`);
+  }
 }
 
-const eliminarDelCarrito = (index) => {
-  carrito.value.splice(index, 1)
+const eliminarDelCarrito = (id) => {
+  
+  const index = carrito.value.findIndex(item => item.id === id);
+
+  if (index !== -1) {
+    carrito.value.splice(index, 1);
+  }
 }
 
 const manejarGuardarDatos = (datos) => {
@@ -56,7 +75,7 @@ const manejarGuardarDatos = (datos) => {
 </script>
 
 <style>
-/* Tus fuentes y estilos globales */
+
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;700&display=swap');
 
 *, *::before, *::after {

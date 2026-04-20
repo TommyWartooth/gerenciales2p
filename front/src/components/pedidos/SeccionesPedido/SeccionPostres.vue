@@ -60,11 +60,6 @@ onMounted(cargarPlatos);
 
 <style scoped>
 /* Contenedor general del menú */
-.pedido-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
 
 /* Lista */
 .postres-lista {

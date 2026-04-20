@@ -88,11 +88,6 @@ width:min(1200px,90%);
 margin:auto;
 }
 
-/* Sections */
-section{
-padding:100px 0;
-}
-
 /* Reusable button */
 .btn-gold{
 display:inline-block;
