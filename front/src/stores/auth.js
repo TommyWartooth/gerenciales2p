@@ -5,56 +5,42 @@ import { ref, computed } from "vue";
 export const useAuthStore = defineStore("auth", () => {
   const usuario = ref(JSON.parse(localStorage.getItem("usuario") || "null"));
   const rol = ref(localStorage.getItem("rol") || null);
-  const tipo = ref(localStorage.getItem("tipo") || null);
-
+  const token = ref(localStorage.getItem("token") || null);
   const isAuthenticated = computed(() => !!usuario.value);
 
-  // ------------ LOGIN ------------
-  async function login({ documento, contrasena }) {
-    const resp = await fetch("http://localhost:3000/api/login", {
-
+  async function login({ documento, contrasela }) {
+    // ← contrasela
+    const resp = await fetch("http://localhost:3000/api/usuarios/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ documento, contrasena }),
+      body: JSON.stringify({ documento, contrasela }), // ← contrasela
     });
 
-    const data = await resp.json(); 
-
+    const data = await resp.json();
     if (!resp.ok || !data.ok) {
-      // servicio lanza errores con message
-      throw new Error(data.message || data.error || "Error al iniciar sesión");
+      throw new Error(data.msg || "Error al iniciar sesión");
     }
 
-    // data viene de loginUsuario:
-    // { ok: true, usuario: {...}, tipo, rol }
+    // tu back devuelve: { ok, token, usuario: { documento, nombre, rol } }
     usuario.value = data.usuario;
-    rol.value = data.rol;
-    tipo.value = data.tipo;
+    rol.value = data.usuario.rol; // ← rol viene dentro de usuario
+    token.value = data.token;
 
-    localStorage.setItem("usuario", JSON.stringify(usuario.value));
-    if (rol.value) localStorage.setItem("rol", rol.value);
-    if (tipo.value) localStorage.setItem("tipo", tipo.value);
+    localStorage.setItem("usuario", JSON.stringify(data.usuario));
+    localStorage.setItem("rol", data.usuario.rol);
+    localStorage.setItem("token", data.token);
 
-    return data; 
+    return data;
   }
 
-  // LOGOUT SOLO FRONT 
   function logout() {
     usuario.value = null;
     rol.value = null;
-    tipo.value = null;
-
+    token.value = null;
     localStorage.removeItem("usuario");
     localStorage.removeItem("rol");
-    localStorage.removeItem("tipo");
+    localStorage.removeItem("token");
   }
 
-  return {
-    usuario,
-    rol,
-    tipo,
-    isAuthenticated,
-    login,
-    logout,
-  };
+  return { usuario, rol, token, isAuthenticated, login, logout };
 });
