@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "front",
   "private": true,
   "version": "0.0.0",
@@ -10,22 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "pinia": "^3.0.4",
     "vue": "^3.5.32",
     "vue-router": "^5.0.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.5",
     "vite": "^8.0.4"
-=======
-  "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.2.0",
-    "bcryptjs": "^3.0.3",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "pg": "^8.20.0",
-    "pinia": "^3.0.4",
-    "sweetalert2": "^11.26.24",
-    "vue-router": "^5.0.4"
->>>>>>> e80c72d59043a62db9ffa3c9679a9515a013c89a
   }
 }
