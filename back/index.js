@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv'; 
 import { pool } from './db/pool.js';
 import usuarioRoutes from './routes/usuarioRoutes.js'; 
-
+import platoRoutes from './routes/platoRoutes.js';
 
 dotenv.config(); 
 
@@ -14,6 +14,7 @@ app.use(cors());
 app.use(json());
 
 app.use('/api/usuarios', usuarioRoutes); 
+app.use('/api/platos', platoRoutes);
 
 
 app.get('/', (req, res) => {
