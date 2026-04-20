@@ -1,24 +1,35 @@
 <template>
   <div id="app">
-    <Navbar />
-    <Topbar />
+    <!--NO son admin-->
+    <template v-if="!esAdmin">
+      <Topbar />
+      <Navbar />
+    </template>
+
     <router-view />
-    <PedidoPanel
-      :carrito="carrito"
-      @confirmar-bebida="agregarAlCarrito"
-      @eliminar-item="eliminarDelCarrito"
-      @guardar-datos="manejarGuardarDatos"
-    />
-    <FooterSeccion />
+
+    <template v-if="!esAdmin">
+      <PedidoPanel
+        :carrito="carrito"
+        @confirmar-bebida="agregarAlCarrito"
+        @eliminar-item="eliminarDelCarrito"
+        @guardar-datos="manejarGuardarDatos"
+      />
+      <FooterSeccion />
+    </template>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Navbar from './components/layout/Navbar.vue'
 import Topbar from './components/layout/Topbar.vue'
 import FooterSeccion from './components/layout/FooterSeccion.vue'
 import PedidoPanel from './components/pedidos/PedidoPanel.vue'
+
+const route = useRoute()
+const esAdmin = computed(() => route.path.startsWith('/admin'))
 
 const carrito = ref([])
 
