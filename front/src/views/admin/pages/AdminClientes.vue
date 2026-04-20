@@ -57,6 +57,8 @@
 import { ref, computed } from "vue";
 import ClientesTabla from "../../../components/admin/Tabla/ClientesTabla.vue";
 import "../../../assets/admin.css";
+import ClientesTabla from "@/components/admin/Tabla/ClientesTabla.vue";
+
 // ==========================
 // DATOS MOCK (luego BD)
 // ==========================

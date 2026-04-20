@@ -109,7 +109,6 @@ const props = defineProps({
 
 const emit = defineEmits(["cerrar", "actualizar"]);
 
-
 const id_plato = props.plato.id_plato ?? props.plato.idplato ?? props.plato.id;
 
 // Campos base
@@ -123,7 +122,6 @@ const disponibilidad = ref(
     props.plato.disponibilidad === 1
 );
 const idcategoria = ref(props.plato.idcategoria ?? "");
-
 
 const imagen = ref(props.plato.imagen || ""); // ej: "/imagenes/platos/lomo_saltado.jpg"
 const previewUrl = ref(imagen.value || null); // si ya hay imagen, la mostramos
@@ -161,6 +159,7 @@ function guardarCambios() {
     disponibilidad: !!disponibilidad.value,
     idcategoria: Number(idcategoria.value),
 
+    // imagen (la original o la nueva si se cambió)
     imagen: imagen.value || null,
   };
 
@@ -171,7 +170,6 @@ function guardarCambios() {
 }
 </script>
 <style scoped>
-
 .overlay {
   position: fixed;
   inset: 0;

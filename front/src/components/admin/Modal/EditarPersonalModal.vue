@@ -122,7 +122,6 @@ const contrasena = ref(props.usuario.contrasena || "");
 const celular = ref(props.usuario.celular || "");
 const telefonoFijo = ref(props.usuario.telefono_fijo || "");
 
-
 function cerrar() {
   emit("cerrar");
 }

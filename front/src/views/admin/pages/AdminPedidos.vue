@@ -40,20 +40,31 @@
     <PedidosTabla :pedidos="pedidosFiltrados" @ver="verPedido" />
 
     <!-- MODAL DETALLE PEDIDO -->
+<<<<<<< HEAD
     <div v-if="pedidoSeleccionado" class="admin-theme">
+=======
+>>>>>>> 30d09b7e27afb885bcb9ed26cc372d43e17f6beb
     <PedidoDetalleModal
       v-if="pedidoSeleccionado"
       :pedido="pedidoSeleccionado"
       @cerrar="pedidoSeleccionado = null"
     />
+<<<<<<< HEAD
     </div>
+=======
+>>>>>>> 30d09b7e27afb885bcb9ed26cc372d43e17f6beb
   </section>
 </template>
 <script setup>
 import { ref, computed } from "vue";
+<<<<<<< HEAD
 import PedidosTabla from "../../../components/admin/Tabla/PedidosTabla.vue";
 import PedidoDetalleModal from "../../../components/admin/Modal/PedidoDetalleModal.vue";
 import '../../../assets/admin.css';
+=======
+import PedidosTabla from "@/components/admin/Tabla/PedidosTabla.vue";
+import PedidoDetalleModal from "@/components/admin/Modal/PedidoDetalleModal.vue";
+>>>>>>> 30d09b7e27afb885bcb9ed26cc372d43e17f6beb
 
 // ==========================
 // DATOS MOCK (luego BD)
@@ -146,7 +157,11 @@ const pedidosFiltrados = computed(() => {
       p.id.toString(),
       p.cliente.toLowerCase(),
       p.tipo_entrega.toLowerCase(),
+<<<<<<< HEAD
     ].some((campo) => campo.includes(b))
+=======
+    ].some((campo) => campo.includes(b)),
+>>>>>>> 30d09b7e27afb885bcb9ed26cc372d43e17f6beb
   );
 });
 
@@ -154,11 +169,19 @@ const stats = computed(() => {
   const totalPedidos = pedidos.value.length;
   const ingresosTotalesNum = pedidos.value.reduce(
     (acc, p) => acc + (p.total || 0),
+<<<<<<< HEAD
     0
   );
   const ingresosTotales = ingresosTotalesNum.toFixed(2);
   const entregasDomicilio = pedidos.value.filter(
     (p) => p.tipo_entrega.toLowerCase() === "domicilio"
+=======
+    0,
+  );
+  const ingresosTotales = ingresosTotalesNum.toFixed(2);
+  const entregasDomicilio = pedidos.value.filter(
+    (p) => p.tipo_entrega.toLowerCase() === "domicilio",
+>>>>>>> 30d09b7e27afb885bcb9ed26cc372d43e17f6beb
   ).length;
 
   return {
@@ -176,6 +199,7 @@ function verPedido(p) {
 </script>
 
 <style scoped>
+<<<<<<< HEAD
 /* Contenedor principal de la sección */
 .admin-section {
   display: flex;
@@ -184,11 +208,19 @@ function verPedido(p) {
   background: transparent;
   margin-top: 0 !important; 
   padding-top: 0 !important;
+=======
+/* lo que ya tenías, igualito */
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+>>>>>>> 30d09b7e27afb885bcb9ed26cc372d43e17f6beb
 }
 
 .admin-section-header {
   display: flex;
   justify-content: space-between;
+<<<<<<< HEAD
   align-items: flex-end; /* Alineado abajo para que el título mande */
   gap: 1rem;
   margin-top: -10px;
@@ -200,11 +232,20 @@ function verPedido(p) {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+=======
+  align-items: flex-start;
+}
+
+.breadcrumbs {
+  font-size: 0.85rem;
+  color: #6d5e4a;
+>>>>>>> 30d09b7e27afb885bcb9ed26cc372d43e17f6beb
   margin-bottom: 4px;
 }
 
 .section-title {
   margin: 0;
+<<<<<<< HEAD
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.8rem;
   font-style: italic;
@@ -216,11 +257,22 @@ function verPedido(p) {
   font-family: 'Jost', sans-serif;
   font-size: 0.85rem;
   color: var(--muted);
+=======
+  font-size: 1.4rem;
+  color: #3b2f22;
+}
+
+.section-desc {
+  margin: 2px 0 0 0;
+  font-size: 0.9rem;
+  color: #6d5e4a;
+>>>>>>> 30d09b7e27afb885bcb9ed26cc372d43e17f6beb
 }
 
 .section-actions {
   display: flex;
   align-items: center;
+<<<<<<< HEAD
   gap: 0.8rem;
 }
 
@@ -246,20 +298,43 @@ function verPedido(p) {
 .stats-row {
   display: flex;
   gap: 1rem;
+=======
+}
+
+.search-input {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #d0c0a4;
+  background: #fdf8ec;
+}
+
+.stats-row {
+  display: flex;
+  gap: 12px;
+>>>>>>> 30d09b7e27afb885bcb9ed26cc372d43e17f6beb
   flex-wrap: wrap;
 }
 
 .stat-card {
   min-width: 180px;
+<<<<<<< HEAD
   background: var(--black-soft); /* NEGRO SOFT */
   padding: 1.2rem;
   border-radius: 4px; /* Más cuadrado = más ejecutivo */
   border: 1px solid rgba(235,205,149,0.1); /* Borde oro casi invisible */
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+=======
+  background: #f7f1e3;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d0c0a4;
+  box-shadow: 0 2px 0 #c6b69a;
+>>>>>>> 30d09b7e27afb885bcb9ed26cc372d43e17f6beb
 }
 
 .stat-label {
   display: block;
+<<<<<<< HEAD
   font-family: 'Jost', sans-serif;
   font-size: 0.72rem;
   color: var(--gold-dim);
@@ -275,3 +350,16 @@ function verPedido(p) {
   color: var(--white); /* NÚMEROS BLANCOS */
 }
 </style>
+=======
+  font-size: 0.8rem;
+  color: #6d5e4a;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #3b2f22;
+}
+</style>
+>>>>>>> 30d09b7e27afb885bcb9ed26cc372d43e17f6beb
