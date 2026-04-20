@@ -504,7 +504,7 @@ function cancelarEdicion() {
 }
 
 function guardarSeccion(seccion) {
-  // logs si quieres...
+  
   seccionActiva.value = null;
 }
 
@@ -536,7 +536,6 @@ async function confirmarDatos() {
 
     const idmodalidad = tipoPedido.value === "domicilio" ? 1 : 2;
 
-    // ✅ FIX: direccion nunca puede ser NULL por tu BD
     const direccionFinal =
       tipoPedido.value === "domicilio"
         ? (direccion?.direccion || "").trim()
@@ -553,7 +552,7 @@ async function confirmarDatos() {
 
       idmodalidad,
       idestadop: 1,
-      direccion: direccionFinal, // ✅ aquí estaba el error
+      direccion: direccionFinal, 
       documento: auth.usuario.documento,
       platos: (props.carrito || []).map((item) => ({
         idplato: item.id,
@@ -570,8 +569,6 @@ async function confirmarDatos() {
       body: JSON.stringify(bodyPedido),
     });
 
-    // ⚠️ Si backend devuelve HTML en error, esto puede romper,
-    // pero si ya no da 500, te sirve normal:
     const data = await resp.json();
 
     if (!resp.ok) {
@@ -579,7 +576,7 @@ async function confirmarDatos() {
     }
 
     console.log("✅ Pedido creado en backend:", data);
-    alert("¡Pedido creado correctamente! 🎉");
+    alert("¡Pedido creado correctamente!");
 
     emit("guardar-datos", {
       ...payload,
