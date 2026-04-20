@@ -18,7 +18,7 @@
           <div class="recep-avatar"></div>
           <div>
             <p class="recep-name">Recepcionista</p>
-            <p class="recep-role">gerenciales2p</p>
+            <p class="recep-role">Inkaterra</p>
           </div>
         </div>
 
@@ -57,7 +57,6 @@
             <span class="recep-menu-text">Pedidos pendientes</span>
           </RouterLink>
 
-          <!-- ⭐ NUEVO BOTÓN AÑADIDO AQUÍ ⭐ -->
           <RouterLink
             to="/recepcionista/pedidos-finalizados"
             class="recep-menu-item"
@@ -75,7 +74,6 @@
             </span>
             <span class="recep-menu-text">Pedidos finalizados</span>
           </RouterLink>
-          <!-- ⭐ FIN DEL NUEVO BOTÓN ⭐ -->
 
           <RouterLink
             to="/recepcionista/reservas"
@@ -95,6 +93,21 @@
             <span class="recep-menu-text">Reservas de clientes</span>
           </RouterLink>
 
+          <RouterLink
+            to="/recepcionista/mesas"
+            class="recep-menu-item"
+            active-class="recep-menu-item--active"
+          >
+            <span class="recep-menu-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M4 10h16v2H4zm0 4h10v2H4zM4 6h16v2H4z"
+                />
+              </svg>
+            </span>
+            <span class="recep-menu-text">Control de mesas</span>
+          </RouterLink>
           <button
             type="button"
             class="recep-menu-item"

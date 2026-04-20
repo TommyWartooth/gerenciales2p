@@ -1,17 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-
 import InicioView from "../views/InicioView.vue";
 import CartaView from "../views/CartaView.vue";
 import ContactoView from "../views/ContactoView.vue";
 
 const routes = [
-  // ── Rutas públicas ──────────────────────────────────
   { path: "/", component: InicioView },
   { path: "/carta", component: CartaView },
   { path: "/contacto", component: ContactoView },
-
-  // ── Administrador ───────────────────────────────────
   {
     path: "/admin",
     component: () => import("@/views/admin/AdminLayout.vue"),
@@ -40,8 +36,6 @@ const routes = [
       },
     ],
   },
-
-  // ── Recepcionista ───────────────────────────────────
   {
     path: "/recepcionista",
     component: () => import("@/views/recepcionista/RecepcionistaLayout.vue"),
@@ -70,8 +64,6 @@ const routes = [
       },
     ],
   },
-
-  // ── Catch-all ───────────────────────────────────────
   { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
 
@@ -83,16 +75,12 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore();
   const requiresAuth = to.matched.some((r) => r.meta.requiresAuth);
-
   if (!requiresAuth) return next();
   if (!auth.isAuthenticated) return next("/");
-
   const allowedRoles = to.matched
     .filter((r) => r.meta.allowedRoles)
     .flatMap((r) => r.meta.allowedRoles);
-
   if (allowedRoles.length && !allowedRoles.includes(auth.rol)) return next("/");
-
   next();
 });
 
