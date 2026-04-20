@@ -30,7 +30,7 @@
             <div>
               <span class="label">Total</span>
               <p class="val total-oro">
-                S/ {{ (pedido.total || 0).toFixed(2) }}
+                BS. {{ (pedido.total || 0).toFixed(2) }}
               </p>
             </div>
           </div>
@@ -65,7 +65,7 @@
                 <tr v-for="(item, idx) in items" :key="idx">
                   <td>{{ item.nombre }}</td>
                   <td>{{ item.cantidad }}</td>
-                  <td style="color: var(--gold)">S/ {{ (item.cantidad * item.precio_unitario).toFixed(2) }}</td>
+                  <td style="color: var(--gold)">Bs. {{ (item.cantidad * item.precio_unitario).toFixed(2) }}</td>
                 </tr>
               </tbody>
             </table>

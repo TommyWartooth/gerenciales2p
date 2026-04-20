@@ -2,8 +2,7 @@
   <div class="admin-theme admin-page">
     <section class="admin-section">
       
-      <header class="admin-sectio
-      n-header">
+      <header class="admin-section-header">
         <div>
           <div class="breadcrumbs">Administración / Clientes</div>
           <h2 class="section-title">Clientes</h2>
@@ -57,7 +56,6 @@
 import { ref, computed } from "vue";
 import ClientesTabla from "../../../components/admin/Tabla/ClientesTabla.vue";
 import "../../../assets/admin.css";
-import ClientesTabla from "@/components/admin/Tabla/ClientesTabla.vue";
 
 // ==========================
 // DATOS MOCK (luego BD)

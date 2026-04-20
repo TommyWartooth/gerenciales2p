@@ -11,10 +11,11 @@ import SideDestacable from '../components/home/SideDestacable.vue'
 <template>
   <Herosection />
   <Ofertasection />
+  <SideOfrecemos />
   <SideSliderPlatos />
   <SideComentarios />
-  <SideMapa />
-  <SideOfrecemos />
   <SideDestacable />
+  <SideMapa />
+  
 </template>
 
