@@ -64,3 +64,26 @@
     </ul>
   </section>
 </template>
+<script setup>
+import { onMounted } from 'vue';
+
+onMounted(() => {
+  const observerOptions = {
+    threshold: 0.2, // Se activa cuando el 20% del elemento es visible
+    rootMargin: '0px 0px -50px 0px' 
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // Opcional: dejar de observar una vez que ya apareció
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  const items = document.querySelectorAll('.timeline-item');
+  items.forEach(item => observer.observe(item));
+});
+</script>

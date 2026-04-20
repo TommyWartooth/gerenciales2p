@@ -1,17 +1,11 @@
 <template>
-  <div class="nosotros-page">
-    <h1>Sobre Nosotros</h1>
-    <p>Nuestra historia comienza aquí...</p>
-  </div>
+  <SideCabeceraTemporal />
+  <SideAboutTemporal />
+  <SideLineaTiempo />
 </template>
 
 <script setup>
-// Aquí puedes meter lógica después
+import SideAboutTemporal from '../components/sobreNosotros/SideAboutTemporal.vue'
+import SideCabeceraTemporal from '../components/sobreNosotros/SideCabeceraTemporal.vue'
+import SideLineaTiempo from '../components/sobreNosotros/SideLineaTiempo.vue'
 </script>
-
-<style scoped>
-.nosotros-page {
-  padding-top: 100px;
-  text-align: center;
-}
-</style>

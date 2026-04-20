@@ -2,7 +2,14 @@
 
 <template>
   <section class="about-split">
+    <div class = "about-split__intro">
+      <h2 class="about-split__title">Inkaterra</h2>
+            <p class="about-split__p">
+                En Inkaterra, fusionamos la tradición con la innovación. Nos dedicamos a ofrecer una experiencia gastronómica que celebra los sabores auténticos y los ingredientes de nuestra región, creando momentos inolvidables para cada uno de nuestros visitantes.
+            </p>
+      </div>
     <div class="about-split__grid">
+  
       <figure class="about-split__media">
         <img
           src="/icono.png"
@@ -12,10 +19,7 @@
       </figure>
 
       <div class="about-split__text">
-        <h2 class="about-split__title">Inkaterra</h2>
-        <p class="about-split__p">
-          En Inkaterra, fusionamos la tradición con la innovación. Nos dedicamos a ofrecer una experiencia gastronómica que celebra los sabores auténticos y los ingredientes de nuestra región, creando momentos inolvidables para cada uno de nuestros visitantes.
-        </p>
+        
 
         <div class="about-split__cards-container">
           

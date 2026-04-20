@@ -57,6 +57,13 @@
   animation: aboutFadeUp 0.9s ease-out both 0.05s;
 }
 
+.about-split__intro {
+  max-width: 800px;
+  margin: 0 auto 60px;
+  padding: 0 20px;
+  text-align: center;
+}
+
 .about-title {
   margin: 0 0 18px;
   font-family: "Playfair Display", Georgia, serif;
@@ -107,25 +114,13 @@
 .about-split__media img {
   display: block;
   width: 100%;
-  max-width: 600px;
+  max-width: 100%px;
   height: auto;
   margin: 0 auto;
   border-radius: 10px;
   object-fit: cover;
   filter: contrast(0.95) saturate(0.95);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-/* Adaptación móvil */
-@media (max-width: 900px) {
-  .about-split__grid {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-  .about-split__media img {
-    max-width: 90%;
-    aspect-ratio: 4 / 3;
-  }
 }
 
 /* === TIMELINEe === */
@@ -240,74 +235,6 @@
   box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.3);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .timeline::before {
-    left: 25px;
-  }
-  .timeline-item {
-    justify-content: flex-start !important;
-  }
-  .timeline-content {
-    width: calc(100% - 80px);
-    margin-left: 60px;
-  }
-  .timeline-badge {
-    left: 25px;
-    transform: none;
-  }
-}
-
-@media (max-width: 900px) {
-  .about-split__grid {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-  .about-split__media img {
-    height: 300px;
-  }
-}
-
-@media (max-width: 768px) {
-  .about-split__grid {
-    grid-template-columns: 1fr; /* imagen arriba, texto abajo */
-  }
-
-  .about-split__media img {
-    aspect-ratio: 4 / 3; /* proporción más vertical en móviles */
-  }
-}
-
-/* Animación suave */
-@keyframes aboutFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Responsivo leve (NO tocar navbar) */
-@media (max-width: 560px) {
-  #sobre-nosotros.about-hero {
-    padding: 90px 16px 110px;
-  }
-
-  .about-subtitle {
-    font-size: 13px;
-  }
-}
-
-[hidden] {
-  display: none !important;
-}
-
-
-/*Contenedores de Misión y Visión*/
-/* Agrupa las dos tarjetas */
 .about-split__cards-container {
   display: flex;
   flex-direction: column; /* En móviles se apilan una sobre otra */
@@ -315,62 +242,201 @@
   margin-top: 2rem;
 }
 
-/* Diseño individual de cada "contenedor/tarjeta" */
 .about-card {
-  background-color: #ffffff; /* Color de fondo de la caja */
-  border: 1px solid #eaeaea; /* Borde sutil */
-  border-radius: 12px; /* Bordes redondeados */
+  background: rgba(14, 13, 11, 0.85); 
+  border: 1px solid rgba(228, 197, 144, 0.3); /* Borde dorado tenue */
+  border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Sombra suave para que parezca flotar */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transición suave para el hover */
+  backdrop-filter: blur(5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease, border-color 0.3s ease;
 }
 
-/* Efecto al pasar el mouse por encima (opcional pero recomendado) */
 .about-card:hover {
-  transform: translateY(-5px); /* Levanta la tarjeta ligeramente */
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Hace la sombra más grande */
-}
-
-/* Estilos internos del contenedor */
-.about-card__icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  transform: translateY(-8px);
+  border-color: var(--gold-crayola); /* Resalta el dorado al pasar el mouse */
+  box-shadow: 0 15px 35px rgba(228, 197, 144, 0.1);
 }
 
 .about-card__title {
+  color: var(--gold-crayola); /* Título en dorado */
+  font-family: "Playfair Display", serif;
   margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-size: 1.25rem;
-  color: #333333;
+  margin-bottom: 0.8rem;
+  font-size: 1.4rem;
 }
 
 .about-card__p {
-  margin: 0;
+  color: #d1d1d1;
   font-size: 0.95rem;
-  line-height: 1.6;
-  color: #555555;
+  line-height: 1.7;
 }
 
-/* Media Query para Escritorio/Tablets*/
-@media (min-width: 768px) {
-  .about-split__cards-container {
-    flex-direction: row; /* En pantallas grandes, se colocan una al lado de la otra */
-  }
-  
-  .about-card {
-    flex: 1; /* Ambas tarjetas ocupan exactamente el mismo ancho (50% / 50%) */
-  }
+.about-card__icon {
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 0 5px rgba(228, 197, 144, 0.4));
 }
+
 
 .imagen-middle {
   display: flex;
-  justify-content: center; /* Centra horizontalmente */
-  align-items: center;     /* Centra verticalmente si el contenedor tiene una altura definida */
-  width: 100%;             /* Asegura que el contenedor ocupe todo el ancho disponible */
+  justify-content: center;
+  align-items: center;     
+  width: 100%;             
 }
 
-/* Opcional: para que la imagen no se desborde en pantallas pequeñas */
 .imagen-lateral-1 {
   max-width: 100%;
   height: auto;
+}
+
+
+/* ==========================================================================
+   SECCIÓN RESPONSIVE (AL FINAL DEL ARCHIVO)
+   ========================================================================== */
+
+/* --- 1. Pantallas Grandes / iMac (Evitar que el contenido se estire infinito) --- */
+@media (min-width: 1400px) {
+  .about-split__grid, 
+  .timeline,
+  .timeline-title-box {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* --- 2. Tablets de 10 Pulgadas (Laptops pequeñas y Tablets horizontales) --- */
+@media (max-width: 1024px) {
+  .about-split__grid {
+    grid-template-columns: 1fr 1fr; /* Mantenemos 2 columnas pero con menos gap */
+    gap: 30px;
+    padding: 0 40px;
+  }
+
+  .about-card {
+    padding: 1.2rem;
+  }
+
+  .about-card__title {
+    font-size: 1.2rem;
+  }
+
+  .about-split__media img {
+    width: 280px; /* Tamaño fijo sugerido para tablet */
+    height: 280px; 
+    border-radius: 50%; /* Asegura el círculo */
+    object-fit: cover; /* Evita que la imagen se estire */
+    margin: 0 auto;
+  }
+  .timeline-content {
+    width: 42%; /* Ajuste para que no se pegue tanto a la línea */
+  }
+}
+
+/* --- 3. Tablets Verticales y Pantallas de 900px --- */
+@media (max-width: 900px) {
+  .about-split__grid {
+    grid-template-columns: 1fr; /* Imagen arriba, texto abajo */
+    text-align: center;
+    gap: 40px;
+  }
+
+  .about-split__media img {
+    width: 250px; /* Un poco más pequeña para dejar aire */
+    height: 250px;
+    border-radius: 50%;
+    object-fit: cover;
+    aspect-ratio: 1 / 1; /* Refuerza la proporción cuadrada antes del circle */
+    margin: 0 auto;
+  }
+
+  .about-split__cards-container {
+    justify-content: center;
+  }
+}
+
+/* --- 4. Celulares (Debajo de 7 Pulgadas / 768px) --- */
+@media (max-width: 768px) {
+  /* HERO */
+  #sobre-nosotros.about-hero {
+    min-height: 40vh;
+    padding: 100px 20px 80px;
+  }
+
+  .about-title {
+    font-size: 38px;
+  }
+
+  /* CARDS MISIÓN/VISIÓN */
+  .about-split__cards-container {
+    flex-direction: column; /* Una card sobre otra */
+    align-items: center;
+  }
+
+  .about-card {
+    width: 100%;
+    max-width: 450px;
+  }
+
+  /* TIMELINE (ELIMINAR ZIGZAG) */
+  .timeline::before {
+    left: 30px; /* Movemos la línea a la izquierda */
+    transform: none;
+  }
+
+  .timeline-item, 
+  .timeline-item.timeline-inverted {
+    justify-content: flex-start !important; /* Todo alineado a la izquierda */
+    padding-left: 65px; /* Espacio para el badge y la línea */
+    margin: 30px 0;
+    text-align: left !important;
+  }
+
+  .timeline-badge {
+    left: 30px;
+    transform: translate(-50%, 0); /* Centrado sobre la línea lateral */
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    top: 10px;
+  }
+
+  .timeline-content {
+    width: 100%; /* Ocupa el resto de la pantalla */
+    padding: 15px 20px;
+  }
+
+  .timeline-item.timeline-inverted .timeline-content {
+    text-align: left; /* Quitamos el centrado/derecha previo */
+  }
+}
+
+/* --- 5. Smartphones Pequeños (Debajo de 480px) --- */
+@media (max-width: 480px) {
+  .about-title {
+    font-size: 30px;
+  }
+
+  .about-subtitle {
+    font-size: 14px;
+  }
+
+  .about-card__icon {
+    font-size: 1.8rem;
+  }
+
+  .timeline-content h3 {
+    font-size: 1.1rem;
+  }
+
+  .about-split {
+    padding: 50px 0;
+  }
+}
+
+/* --- 6. Utilidad para ocultar elementos si es necesario --- */
+[hidden] {
+  display: none !important;
 }
