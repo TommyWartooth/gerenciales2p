@@ -1,13 +1,15 @@
 <template>
   <div id="app">
-    <template v-if="!esVistaPanel">
+    <header v-if="!esVistaPanel">
       <Navbar />
       <Topbar />
-    </template>
+    </header>
 
-    <router-view />
+    <main>
+      <router-view />
+    </main>
 
-    <template v-if="!esVistaPanel">
+    <footer v-if="!esVistaPanel">
       <PedidoPanel
         :carrito="carrito"
         @confirmar-bebida="agregarAlCarrito"
@@ -15,7 +17,7 @@
         @guardar-datos="manejarGuardarDatos"
       />
       <FooterSeccion />
-    </template>
+    </footer>
   </div>
 </template>
 
@@ -28,18 +30,24 @@ import FooterSeccion from './components/layout/FooterSeccion.vue'
 import PedidoPanel from './components/pedidos/PedidoPanel.vue'
 
 const route = useRoute()
-const esAdmin = computed(() => route.path.startsWith('/admin'))
+
+// Computed para detectar si estamos en el panel de control
+const esVistaPanel = computed(() => {
+  // El ?. evita errores si route.path no ha cargado aún
+  return route.path?.startsWith("/admin") || route.path?.startsWith("/recepcionista")
+})
 
 const carrito = ref([])
 
-// Oculta navbar/footer cuando estás en admin o recepcionista
-const esVistaPanel = computed(
-  () =>
-    route.path.startsWith("/admin") || route.path.startsWith("/recepcionista"),
-);
+const agregarAlCarrito = (item) => {
+  carrito.value.push(item)
+}
 
-const carrito = ref([]);
-const agregarAlCarrito = (item) => carrito.value.push(item);
-const eliminarDelCarrito = (index) => carrito.value.splice(index, 1);
-const manejarGuardarDatos = (datos) => console.log("Datos guardados:", datos);
+const eliminarDelCarrito = (index) => {
+  carrito.value.splice(index, 1)
+}
+
+const manejarGuardarDatos = (datos) => {
+  console.log("Datos guardados:", datos)
+}
 </script>

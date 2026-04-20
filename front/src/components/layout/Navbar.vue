@@ -2,212 +2,83 @@
   <header>
     <nav class="navbar">
       <div class="navbar__inner">
-        <!-- LOGO -->
-        <a
-          href="#inicio"
-          class="navbar__logo"
-          @click.prevent="scrollTo('inicio')"
-        >
+        <router-link to="/" class="navbar__logo" @click="menuOpen = false">
           <img src="/icono.png" alt="Logo" class="navbar__logo-img" />
-        </a>
+        </router-link>
 
-        <!-- LINKS -->
         <ul class="navbar__links" :class="{ 'navbar__links--open': menuOpen }">
-          <li><a @click="scrollTo('inicio')">Inicio</a></li>
-          <li><a @click="scrollTo('carta')">Carta</a></li>
-          <li><a @click="scrollTo('nosotros')">Sobre Nosotros</a></li>
-          <li><a @click="scrollTo('contacto')">Contacto</a></li>
+          <li><router-link to="/" @click="menuOpen = false">Inicio</router-link></li>
+          <li><router-link to="/carta" @click="menuOpen = false">Carta</router-link></li>
+          <li><router-link to="/nosotros" @click="menuOpen = false">Sobre Nosotros</router-link></li>
+          <li><router-link to="/contacto" @click="menuOpen = false">Contacto</router-link></li>
         </ul>
 
-        <!-- AUTH -->
         <div class="navbar__auth">
           <div class="user-menu" ref="userMenu">
-            <button class="user-btn" @click="toggleUserMenu">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path
-                  d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
-                />
+            <button class="user-btn" @click="toggleUserMenu" aria-label="Menu de usuario">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
               </svg>
             </button>
 
             <div v-if="mostrarUserMenu" class="user-dropdown">
               <template v-if="!estaAutenticado">
-                <a @click="abrirLogin">Iniciar sesión</a>
-                <a @click="abrirRegistro">Registrarse</a>
+                <a href="#" @click.prevent="abrirLogin">Iniciar sesión</a>
+                <a href="#" @click.prevent="abrirRegistro">Registrarse</a>
               </template>
               <template v-else>
                 <span class="user-name">Hola, {{ nombreUsuario }}</span>
-                <a @click="cerrarSesion">Cerrar sesión</a>
+                <router-link 
+                  v-if="auth.usuario?.rol !== 'cliente'" 
+                  :to="getDashboardLink" 
+                  @click="mostrarUserMenu = false"
+                >
+                  Panel Control
+                </router-link>
+                <a href="#" @click.prevent="handleCerrarSesion">Cerrar sesión</a>
               </template>
             </div>
           </div>
 
-          <a class="navbar__cta" @click.prevent="pedidoPanel.abrir()"
-            >Pedir Ahora</a
-          >
+          <a class="navbar__cta" href="#" @click.prevent="pedidoPanel.abrir()">Pedir Ahora</a>
         </div>
 
-        <!-- BURGER -->
-        <button
-          class="navbar__burger"
-          @click="toggleMenu"
-          :class="{ open: menuOpen }"
-          aria-label="Menú"
-        >
+        <button class="navbar__burger" @click="toggleMenu" :class="{ open: menuOpen }" aria-label="Menú">
           <span></span><span></span><span></span>
         </button>
       </div>
     </nav>
 
-    <!-- MODAL LOGIN -->
-    <div
-      v-if="mostrarLogin"
-      class="modal-backdrop"
-      @click.self="mostrarLogin = false"
-    >
+    <div v-if="mostrarLogin" class="modal-backdrop" @click.self="mostrarLogin = false">
       <div class="modal-contenedor">
         <button class="modal-cerrar" @click="mostrarLogin = false">✕</button>
         <h2 class="modal-titulo">Iniciar Sesión</h2>
-        <form @submit.prevent="login">
-          <input
-            v-model="documento"
-            type="text"
-            class="modal-input"
-            placeholder="Documento"
-            required
-          />
-          <input
-            v-model="password"
-            type="password"
-            class="modal-input"
-            placeholder="Contraseña"
-            required
-          />
+        <form @submit.prevent="ejecutarLogin">
+          <input v-model="formLogin.documento" type="text" class="modal-input" placeholder="Documento" required />
+          <input v-model="formLogin.password" type="password" class="modal-input" placeholder="Contraseña" required />
           <button type="submit" class="modal-btn">Entrar</button>
         </form>
         <p class="modal-link">
-          ¿No tienes cuenta? <a @click.prevent="abrirRegistro">Registrarse</a>
+          ¿No tienes cuenta? <a href="#" @click.prevent="abrirRegistro">Registrarse</a>
         </p>
       </div>
     </div>
 
-    <!-- MODAL REGISTRO -->
-    <div
-      v-if="mostrarRegistro"
-      class="modal-backdrop"
-      @click.self="mostrarRegistro = false"
-    >
+    <div v-if="mostrarRegistro" class="modal-backdrop" @click.self="mostrarRegistro = false">
       <div class="modal-contenedor modal-contenedor--grande">
         <button class="modal-cerrar" @click="mostrarRegistro = false">✕</button>
         <h2 class="modal-titulo">Crear cuenta</h2>
-
-        <form @submit.prevent="registrar" class="form-registro">
+        <form @submit.prevent="ejecutarRegistro" class="form-registro">
           <div class="form-grid">
-            <input
-              v-model="regNombre"
-              type="text"
-              class="modal-input"
-              placeholder="Nombres"
-              required
-            />
-            <input
-              v-model="regApellido"
-              type="text"
-              class="modal-input"
-              placeholder="Apellidos"
-              required
-            />
-            <input
-              v-model="regEmail"
-              type="email"
-              class="modal-input"
-              placeholder="Correo electrónico"
-              required
-            />
-            <input
-              v-model="regDocumento"
-              type="text"
-              class="modal-input"
-              placeholder="Documento"
-              required
-            />
-            <input
-              v-model="regCelular"
-              type="tel"
-              class="modal-input"
-              placeholder="Celular"
-              required
-            />
-            <input
-              v-model="regTelFijo"
-              type="tel"
-              class="modal-input"
-              placeholder="Teléfono fijo"
-              required
-            />
-            <input
-              v-model="regNit"
-              type="text"
-              class="modal-input"
-              placeholder="NIT (opcional)"
-            />
-            <input
-              v-model="regRazonSocial"
-              type="text"
-              class="modal-input"
-              placeholder="Razón Social (opcional)"
-            />
-            <div class="modal-input-fecha">
-              <label>Fecha de nacimiento</label>
-              <input
-                v-model="regFechaNac"
-                type="date"
-                class="modal-input"
-                required
-              />
-            </div>
-            <input
-              v-model="regPass"
-              type="password"
-              class="modal-input"
-              placeholder="Contraseña"
-              required
-            />
+            <input v-model="formReg.nombre" type="text" class="modal-input" placeholder="Nombres" required />
+            <input v-model="formReg.apellido" type="text" class="modal-input" placeholder="Apellidos" required />
+            <input v-model="formReg.email" type="email" class="modal-input" placeholder="Correo" required />
+            <input v-model="formReg.documento" type="text" class="modal-input" placeholder="Documento" required />
           </div>
-
-          <!-- Foto -->
-          <div class="foto-perfil-box">
-            <p class="foto-label">Foto de perfil</p>
-            <img
-              :src="regFotoPreview || '/imagenes/fotouser.png'"
-              class="foto-preview"
-              alt="Foto de perfil"
-            />
-            <label class="input-file-label">
-              Seleccionar imagen
-              <input
-                type="file"
-                accept="image/*"
-                @change="onFotoSeleccionada"
-                hidden
-              />
-            </label>
-          </div>
-
-          <label class="checkbox-label">
-            <input v-model="aceptaTerminos" type="checkbox" required />
-            Acepto los <a href="#" target="_blank">Términos y condiciones</a>
-          </label>
-
           <button type="submit" class="modal-btn">Registrarse</button>
         </form>
-
         <p class="modal-link">
-          ¿Ya tienes cuenta? <a @click.prevent="abrirLogin">Iniciar sesión</a>
+          ¿Ya tienes cuenta? <a href="#" @click.prevent="abrirLogin">Iniciar sesión</a>
         </p>
       </div>
     </div>
@@ -215,127 +86,94 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, reactive, nextTick } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import { useRouter, useRoute } from "vue-router";
 import { pedidoPanel } from "../../stores/pedidoPanel";
-import { useAuthStore } from "@/stores/auth"; // ← agregar
-import { useRouter } from "vue-router";
 
 const auth = useAuthStore();
 const router = useRouter();
+const route = useRoute();
 
-// ── Nav ──────────────────────────────────────────────
 const menuOpen = ref(false);
+const mostrarUserMenu = ref(false);
+const mostrarLogin = ref(false);
+const mostrarRegistro = ref(false);
+const userMenu = ref(null);
+
+const formLogin = reactive({ documento: "", password: "" });
+const formReg = reactive({ nombre: "", apellido: "", email: "", documento: "" });
+
 const toggleMenu = () => (menuOpen.value = !menuOpen.value);
-const scrollTo = (id) => {
-  menuOpen.value = false;
-  const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: "smooth" });
+
+// --- AUTH ---
+const estaAutenticado = computed(() => auth.isAuthenticated);
+const nombreUsuario = computed(() => auth.usuario?.nombre || "Usuario");
+
+const getDashboardLink = computed(() => {
+  const rol = (auth.usuario?.rol || "").toLowerCase();
+  if (rol === "administrador") return "/admin";
+  if (rol === "recepcionista") return "/recepcionista";
+  return "/";
+});
+
+const abrirLogin = () => {
+  mostrarRegistro.value = false;
+  mostrarLogin.value = true;
+  mostrarUserMenu.value = false;
 };
 
-// ── Auth (UI only — conectar al store cuando esté el back) ──
-const estaAutenticado = computed(() => auth.isAuthenticated);
-const nombreUsuario = computed(() => auth.usuario?.nombre || "");
+const abrirRegistro = () => {
+  mostrarLogin.value = false;
+  mostrarRegistro.value = true;
+  mostrarUserMenu.value = false;
+};
 
-// ── User dropdown ─────────────────────────────────────
-const mostrarUserMenu = ref(false);
-const userMenu = ref(null);
-const toggleUserMenu = () => (mostrarUserMenu.value = !mostrarUserMenu.value);
+const ejecutarLogin = async () => {
+  try {
+    const data = await auth.login({
+      documento: formLogin.documento,
+      contrasela: formLogin.password,
+    });
+
+    mostrarLogin.value = false;
+    const rol = (data.usuario.rol || "").toLowerCase();
+    if (rol === "administrador") router.push("/admin");
+    else if (rol === "recepcionista") router.push("/recepcionista");
+    else router.push("/");
+
+    formLogin.documento = "";
+    formLogin.password = "";
+  } catch (err) {
+    alert(err.message || "Credenciales incorrectas");
+  }
+};
+
+const handleCerrarSesion = () => {
+  auth.logout();
+  mostrarUserMenu.value = false;
+  router.push("/");
+};
+
+const ejecutarRegistro = () => {
+  alert("Registro exitoso (Simulado)");
+  abrirLogin();
+};
+
+const toggleUserMenu = (e) => {
+  e.stopPropagation();
+  mostrarUserMenu.value = !mostrarUserMenu.value;
+};
 
 const handleClickOutside = (e) => {
   if (userMenu.value && !userMenu.value.contains(e.target)) {
     mostrarUserMenu.value = false;
   }
 };
+
 onMounted(() => document.addEventListener("click", handleClickOutside));
-onBeforeUnmount(() =>
-  document.removeEventListener("click", handleClickOutside),
-);
-
-// ── Modales ───────────────────────────────────────────
-const mostrarLogin = ref(false);
-const mostrarRegistro = ref(false);
-
-const abrirLogin = () => {
-  mostrarLogin.value = true;
-  mostrarRegistro.value = false;
-  mostrarUserMenu.value = false;
-};
-const abrirRegistro = () => {
-  mostrarRegistro.value = true;
-  mostrarLogin.value = false;
-  mostrarUserMenu.value = false;
-};
-
-// ── Login (UI only) ───────────────────────────────────
-const documento = ref("");
-const password = ref("");
-
-const login = async () => {
-  try {
-    const data = await auth.login({
-      documento: documento.value,
-      contrasela: password.value, // ← contrasela, como está en tu BD
-    });
-
-    const rolNorm = (data.usuario.rol || "").toLowerCase();
-
-    if (rolNorm === "administrador") {
-      router.push("/admin");
-    } else if (rolNorm === "recepcionista") {
-      router.push("/recepcionista");
-    } else {
-      router.push("/");
-    }
-
-    mostrarLogin.value = false;
-    mostrarUserMenu.value = false;
-    documento.value = "";
-    password.value = "";
-  } catch (err) {
-    alert(err.message || "Revisa tu documento o contraseña");
-  }
-};
-
-const cerrarSesion = () => {
-  auth.logout();
-  mostrarUserMenu.value = false;
-  router.push("/");
-};
-
-// ── Registro (UI only) ────────────────────────────────
-const regNombre = ref("");
-const regApellido = ref("");
-const regEmail = ref("");
-const regDocumento = ref("");
-const regFechaNac = ref("");
-const regCelular = ref("");
-const regTelFijo = ref("");
-const regPass = ref("");
-const regNit = ref("");
-const regRazonSocial = ref("");
-const regFoto = ref(null);
-const regFotoPreview = ref(null);
-const aceptaTerminos = ref(false);
-
-const onFotoSeleccionada = (e) => {
-  const archivo = e.target.files[0];
-  if (!archivo) return;
-  regFoto.value = archivo.name;
-  regFotoPreview.value = URL.createObjectURL(archivo);
-};
-
-const registrar = () => {
-  if (!aceptaTerminos.value) {
-    alert("Debes aceptar los términos y condiciones");
-    return;
-  }
-  // TODO: conectar con backend
-  alert("¡Cuenta creada! (modo demo — conectar al back pronto)");
-  mostrarRegistro.value = false;
-  mostrarLogin.value = true;
-};
+onBeforeUnmount(() => document.removeEventListener("click", handleClickOutside));
 </script>
-
 <style scoped>
 /* ── Navbar ── */
 .navbar {
