@@ -1,0 +1,376 @@
+#sobre-nosotros.about-hero {
+  position: relative;
+  min-height: 40vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 110px 20px 140px;
+  color: var(--white);
+  overflow: hidden;
+
+  scroll-margin-top: 120px;
+}
+
+.about-hero {
+  background: url("imagenes/fondomenosplatos.png") center center / cover
+    no-repeat;
+}
+
+.about-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 8, 97, 0.39);
+  backdrop-filter: blur(2px);
+  z-index: 0;
+}
+
+.container-timeline {
+  background: url("imagenes/fondohojitas.png") no-repeat;
+  background-size: cover;
+  height: 760px;
+}
+
+.about-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 5, 54, 0.363);
+  z-index: 0;
+}
+
+#sobre-nosotros.about-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    75% 60% at 50% 8%,
+    transparent 0 55%,
+    rgba(0, 0, 0, 0.28) 78%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  pointer-events: none;
+}
+
+.about-center {
+  position: relative;
+  z-index: 1;
+  animation: aboutFadeUp 0.9s ease-out both 0.05s;
+}
+
+.about-title {
+  margin: 0 0 18px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(38px, 4.8vw, 64px);
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+}
+.about-title em {
+  font-style: italic;
+  font-weight: 400;
+  opacity: 0.95;
+}
+
+.about-subtitle {
+  margin: 0;
+  font-size: 22px;
+  color: var(--white-alpha-13);
+  opacity: 0.55;
+}
+
+/* === pequeño about us === */
+.about-split {
+  position: relative;
+  background: url("imagenes/fondohojitas2.png") center center / cover no-repeat;
+  padding: 80px 0;
+  color: white;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Asegura que el grid no tape el fondo */
+.about-split__grid {
+  background: transparent !important;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  position: relative;
+  z-index: 1; /* para estar por encima del fondo */
+}
+
+/* Imagen responsiva */
+.about-split__media img {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 10px;
+  object-fit: cover;
+  filter: contrast(0.95) saturate(0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Adaptación móvil */
+@media (max-width: 900px) {
+  .about-split__grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .about-split__media img {
+    max-width: 90%;
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* === TIMELINEe === */
+.container-timeline {
+  position: relative;
+  background: #0e0d0b; /* o tu imagen si quieres */
+  padding: 80px 0;
+  height: auto !important; /* quita la altura fija */
+  min-height: unset !important; /* por si quedó alguna */
+  overflow: visible !important; /* evita que recorte */
+}
+
+/* ===== título del timeline ===== */
+.timeline-title-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 1; /* para que no tape nada */
+}
+
+.timeline-title {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(18px, 2vw, 24px); /* más pequeño */
+  color: var(--gold-crayola);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  padding: 6px 18px; /* más compacto */
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.1);
+  backdrop-filter: blur(2px);
+  font-weight: 500;
+}
+
+.timeline {
+  position: relative;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  max-width: 1000px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(-50%);
+}
+
+.timeline-item {
+  position: relative;
+  margin: 40px 0;
+  display: flex;
+  justify-content: flex-end;
+  clear: both;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s ease-out;
+}
+.timeline-item.timeline-inverted {
+  justify-content: flex-start;
+}
+
+.timeline-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.timeline-content {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 20px 30px;
+  border-radius: 10px;
+  width: 40%;
+  color: #eee;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  position: relative;
+}
+.timeline-item.timeline-inverted .timeline-content {
+  text-align: left;
+}
+
+.timeline-content h3 {
+  color: var(--gold-crayola);
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.timeline-badge {
+  position: absolute;
+  left: 50%;
+  top: 25px;
+  width: 50px;
+  height: 50px;
+  background: var(--gold-crayola);
+  color: var(--black);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  transform: translate(-50%, 0);
+  z-index: 2;
+  box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .timeline::before {
+    left: 25px;
+  }
+  .timeline-item {
+    justify-content: flex-start !important;
+  }
+  .timeline-content {
+    width: calc(100% - 80px);
+    margin-left: 60px;
+  }
+  .timeline-badge {
+    left: 25px;
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .about-split__grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .about-split__media img {
+    height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-split__grid {
+    grid-template-columns: 1fr; /* imagen arriba, texto abajo */
+  }
+
+  .about-split__media img {
+    aspect-ratio: 4 / 3; /* proporción más vertical en móviles */
+  }
+}
+
+/* Animación suave */
+@keyframes aboutFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsivo leve (NO tocar navbar) */
+@media (max-width: 560px) {
+  #sobre-nosotros.about-hero {
+    padding: 90px 16px 110px;
+  }
+
+  .about-subtitle {
+    font-size: 13px;
+  }
+}
+
+[hidden] {
+  display: none !important;
+}
+
+
+/*Contenedores de Misión y Visión*/
+/* Agrupa las dos tarjetas */
+.about-split__cards-container {
+  display: flex;
+  flex-direction: column; /* En móviles se apilan una sobre otra */
+  gap: 1.5rem; /* Espacio entre los contenedores */
+  margin-top: 2rem;
+}
+
+/* Diseño individual de cada "contenedor/tarjeta" */
+.about-card {
+  background-color: #ffffff; /* Color de fondo de la caja */
+  border: 1px solid #eaeaea; /* Borde sutil */
+  border-radius: 12px; /* Bordes redondeados */
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Sombra suave para que parezca flotar */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transición suave para el hover */
+}
+
+/* Efecto al pasar el mouse por encima (opcional pero recomendado) */
+.about-card:hover {
+  transform: translateY(-5px); /* Levanta la tarjeta ligeramente */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Hace la sombra más grande */
+}
+
+/* Estilos internos del contenedor */
+.about-card__icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.about-card__title {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  color: #333333;
+}
+
+.about-card__p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #555555;
+}
+
+/* Media Query para Escritorio/Tablets*/
+@media (min-width: 768px) {
+  .about-split__cards-container {
+    flex-direction: row; /* En pantallas grandes, se colocan una al lado de la otra */
+  }
+  
+  .about-card {
+    flex: 1; /* Ambas tarjetas ocupan exactamente el mismo ancho (50% / 50%) */
+  }
+}
+
+.imagen-middle {
+  display: flex;
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center;     /* Centra verticalmente si el contenedor tiene una altura definida */
+  width: 100%;             /* Asegura que el contenedor ocupe todo el ancho disponible */
+}
+
+/* Opcional: para que la imagen no se desborde en pantallas pequeñas */
+.imagen-lateral-1 {
+  max-width: 100%;
+  height: auto;
+}
