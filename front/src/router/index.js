@@ -8,7 +8,7 @@ import ContactoView from "../views/ContactoView.vue";
 import NosotrosView from "../views/NosotrosView.vue";
 
 const routes = [
-  { path: "/", component: () => import("../views/InicioView.vue") },
+  { path: "/", name: "inicio", component: InicioView },
   { 
     path: "/carta", 
     name: "carta",
@@ -19,46 +19,44 @@ const routes = [
     name: "contacto",
     component: ContactoView 
   },
-{ path: '/nosotros', component: () => import('../views/NosotrosView.vue') },
+  { 
+    path: '/nosotros', 
+    name: 'nosotros',
+    component: NosotrosView 
+  },
   
-  // PANEL DE ADMINISTRADOR
   // PANEL DE ADMINISTRADOR
   {
     path: "/admin",
     component: () => import("@/views/admin/AdminLayout.vue"),
     meta: { requiresAuth: true, allowedRoles: ["administrador"] },
     children: [
-      // 1. El redirect está bien
       { path: "", redirect: "/admin/dashboard" }, 
-      
-      // 2. CORRECCIÓN: El path debe ser "dashboard" (sin espacios y con el nombre)
       {
         path: "dashboard", 
-        name: "admin-dashboard", // Es buena práctica ponerle nombre
+        name: "admin-dashboard",
         component: () => import("@/views/admin/pages/AdminDashboard.vue"),
       },
       {
         path: "usuarios",
+        name: "admin-usuarios",
         component: () => import("@/views/admin/pages/AdminUsuarios.vue"),
       },
       {
         path: "clientes",
-        // Cambia @ por la ruta real desde donde está tu router/index.js
+        name: "admin-clientes",
         component: () => import("../views/admin/pages/AdminClientes.vue"),
       },
       {
         path: "platos",
+        name: "admin-platos",
         component: () => import("../views/admin/pages/AdminPlatos.vue"),
       },
       {
         path: "pedidos",
+        name: "admin-pedidos",
         component: () => import("../views/admin/pages/AdminPedidos.vue"),
       },
-      {
-        path: '/',
-        name: 'home',
-        component: () => import('../views/HomeView.vue') // Tu página principal
-      },  
     ],
   },
 
@@ -71,21 +69,32 @@ const routes = [
       { path: "", redirect: "/recepcionista/nuevo-pedido" },
       {
         path: "nuevo-pedido",
+        name: "recepcionista-nuevo",
         component: () => import("@/views/recepcionista/paginas/RecepcionistaNuevoPedido.vue"),
       },
       {
         path: "pedidos-pendientes",
+        name: "recepcionista-pendientes",
         component: () => import("@/views/recepcionista/paginas/RecepcionistaPedidosPendientes.vue"),
       },
       {
         path: "pedidos-finalizados",
+        name: "recepcionista-finalizados",
         component: () => import("@/views/recepcionista/paginas/RecepcionistaListaPedidos.vue"),
       },
       {
         path: "reservas",
+        name: "recepcionista-reservas",
         component: () => import("@/views/recepcionista/paginas/RecepcionistaReservasClientes.vue"),
       },
     ],
+  },
+
+  // Ruta para el Home (si es diferente a Inicio)
+  {
+    path: '/home',
+    name: 'home',
+    component: () => import('../views/HomeView.vue')
   },
 
   // Redirigir cualquier ruta desconocida al inicio
@@ -97,34 +106,38 @@ const router = createRouter({
   routes,
 });
 
+// GUARDIA DE NAVEGACIÓN
 router.beforeEach((to, from, next) => {
-  // 1. Obtener el store DENTRO de la función
-  /* const auth = useAuthStore();
+  const auth = useAuthStore();
   
+  // Verifica si alguna de las rutas en la jerarquía requiere autenticación
   const requiresAuth = to.matched.some((r) => r.meta.requiresAuth);
   
-  // 2. Si la ruta no requiere auth, lo dejamos pasar de inmediato
-  if (!requiresAuth) {
-    return next();
-  }
-  
-  // 3. Si requiere auth y no está autenticado, al inicio
+  // --- MODO DESARROLLO ---
+  // Si quieres desactivar la protección temporalmente, pon esta variable en true
+  const modoLibre = false; 
+
+  if (modoLibre) return next();
+  // ------------------------
+
+  if (!requiresAuth) return next();
+
+  // Si no está autenticado
   if (!auth.isAuthenticated) {
-    console.warn("Acceso denegado: Usuario no autenticado");
-    return next("/");
+    console.warn("Bloqueado: No autenticado");
+    return next("/"); 
   }
-  
-  // 4. Verificar roles
+
+  // Verificar roles
   const allowedRoles = to.matched
     .filter((r) => r.meta.allowedRoles)
     .flatMap((r) => r.meta.allowedRoles);
     
   if (allowedRoles.length && !allowedRoles.includes(auth.rol)) {
-    console.warn("Acceso denegado: Rol insuficiente");
+    console.warn("Bloqueado: Rol insuficiente");
     return next("/");
-  } */  //comentado pq de momento no me deja acceder a admin :'v
-  
-  // 5. Si todo está bien, adelante
+  }
+
   next();
 });
 

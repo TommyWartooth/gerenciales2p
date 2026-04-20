@@ -35,7 +35,7 @@ export class PedidoService {
       JOIN modalidad m ON m.idmodalidad = p.idmodalidad
       WHERE p.idestadop IN (1, 2, 3)
       ORDER BY p.fecha_hora_pedido DESC, p.nropedido, pl.nombre;
-      `,
+      `
     );
 
     const mapa = new Map();
@@ -77,6 +77,193 @@ export class PedidoService {
     return Array.from(mapa.values());
   }
 
+  /**
+   * Obtener un pedido por ID
+   */
+  async getById(nropedido) {
+    const client = await pool.connect();
+    try {
+      const { rows: pedidosRows } = await client.query(
+        "SELECT * FROM pedido WHERE nropedido = $1",
+        [nropedido]
+      );
+      if (pedidosRows.length === 0) return null;
+
+      const { rows: platosRows } = await client.query(
+        `
+        SELECT pp.idplato, pp.cantidad, p.nombre, p.costo_unitario
+        FROM pedido_plato pp
+        JOIN plato p ON p.idplato = pp.idplato
+        WHERE pp.nropedido = $1
+        `,
+        [nropedido]
+      );
+
+      const platos = platosRows.map((r) => ({
+        idplato: r.idplato,
+        cantidad: r.cantidad,
+        nombre: r.nombre,
+        costo_unitario: Number(r.costo_unitario),
+      }));
+
+      return Pedido.fromDbRow(pedidosRows[0], platos);
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * CREAR pedido
+   */
+  async create(data) {
+    const pedido = new Pedido({
+      ...data,
+      fecha_hora_pedido: data.fecha_hora_pedido ?? new Date(),
+    });
+
+    pedido.validarCrear();
+
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      const insertPedidoQuery = `
+        INSERT INTO pedido (comentarios, fecha_hora_pedido, idmodalidad, idestadop, direccion, documento)
+        VALUES ($1, NOW(), $2, $3, $4, $5)
+        RETURNING *;
+      `;
+
+      const pedidoValues = [
+        pedido.comentarios,
+        pedido.idmodalidad,
+        pedido.idestadop,
+        pedido.direccion,
+        pedido.documento,
+      ];
+
+      const { rows: pedidoRows } = await client.query(
+        insertPedidoQuery,
+        pedidoValues
+      );
+
+      const nropedido = pedidoRows[0].nropedido;
+
+      const insertDetalleQuery = `
+        INSERT INTO pedido_plato (nropedido, idplato, cantidad)
+        VALUES ($1, $2, $3)
+      `;
+
+      for (const item of pedido.platos) {
+        await client.query(insertDetalleQuery, [
+          nropedido,
+          item.idplato,
+          item.cantidad,
+        ]);
+      }
+
+      await client.query("COMMIT");
+      return await this.getById(nropedido);
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * ACTUALIZAR pedido completo
+   */
+  async updateCompleto(nropedido, data) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      const updateCabeceraQuery = `
+        UPDATE pedido
+        SET comentarios = $1,
+            fecha_hora_pedido = COALESCE($2, fecha_hora_pedido),
+            idmodalidad = $3,
+            idestadop = $4,
+            direccion = $5,
+            documento = $6
+        WHERE nropedido = $7
+        RETURNING *;
+      `;
+
+      const cabeceraValues = [
+        data.comentarios ?? null,
+        data.fecha_hora_pedido ?? null,
+        data.idmodalidad,
+        data.idestadop,
+        data.direccion ?? null,
+        data.documento,
+        nropedido,
+      ];
+
+      const { rows: cabeceraRows } = await client.query(
+        updateCabeceraQuery,
+        cabeceraValues
+      );
+
+      if (cabeceraRows.length === 0) {
+        await client.query("ROLLBACK");
+        return null;
+      }
+
+      await client.query("DELETE FROM pedido_plato WHERE nropedido = $1", [
+        nropedido,
+      ]);
+
+      const insertDetalleQuery = `
+        INSERT INTO pedido_plato (nropedido, idplato, cantidad)
+        VALUES ($1, $2, $3)
+      `;
+
+      const nuevosPlatos = data.platos ?? [];
+
+      for (const item of nuevosPlatos) {
+        await client.query(insertDetalleQuery, [
+          nropedido,
+          item.idplato,
+          item.cantidad,
+        ]);
+      }
+
+      await client.query("COMMIT");
+      return await this.getById(nropedido);
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  async delete(nropedido) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      await client.query("DELETE FROM pedido_plato WHERE nropedido = $1", [
+        nropedido,
+      ]);
+
+      const { rowCount } = await client.query(
+        "DELETE FROM pedido WHERE nropedido = $1",
+        [nropedido]
+      );
+
+      await client.query("COMMIT");
+      return rowCount > 0;
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
   async actualizarEstado(nropedido, idestadop) {
     const client = await pool.connect();
     try {
@@ -95,7 +282,7 @@ export class PedidoService {
         p.idestadop,
         ep.nombre AS estado;
       `,
-        [nropedido, idestadop],
+        [nropedido, idestadop]
       );
 
       if (pedidoRows.length === 0) {
@@ -113,7 +300,7 @@ export class PedidoService {
       JOIN usuario_cliente uc ON uc.documento = u.documento
       WHERE u.documento = $1
       `,
-        [pedidoRow.documento],
+        [pedidoRow.documento]
       );
 
       let correoCliente = null;
@@ -142,5 +329,37 @@ export class PedidoService {
     } finally {
       client.release();
     }
+  }
+
+  async getHistorial() {
+    const { rows } = await pool.query(
+      `
+    SELECT
+      p.nropedido                  AS id,
+      u.nombre                     AS cliente,
+      uc.nit,
+      uc.razon_social,
+      m.nombre                     AS modalidad,
+      ep.nombre                    AS estado,
+      TO_CHAR(p.fecha_hora_pedido, 'YYYY-MM-DD') AS fecha,
+      TO_CHAR(p.fecha_hora_pedido, 'HH24:MI')    AS hora,
+      COALESCE(SUM(pp.cantidad * pl.costo_unitario), 0) AS total,
+      p.comentarios
+    FROM pedido p
+    JOIN usuario u               ON u.documento = p.documento
+    LEFT JOIN usuario_cliente uc ON uc.documento = p.documento
+    JOIN modalidad m             ON m.idmodalidad = p.idmodalidad
+    JOIN estadop ep              ON ep.idestadop = p.idestadop
+    JOIN pedido_plato pp         ON pp.nropedido = p.nropedido
+    JOIN plato pl                ON pl.idplato = pp.idplato
+    WHERE p.idestadop IN (4, 5)  -- 4 = Hecho, 5 = Cancelado
+    GROUP BY 
+      p.nropedido, u.nombre, uc.nit, uc.razon_social,
+      m.nombre, ep.nombre, fecha, hora, p.comentarios
+    ORDER BY p.fecha_hora_pedido DESC;
+    `
+    );
+
+    return rows;
   }
 }

@@ -8,5 +8,13 @@
     "pinia": "^3.0.4",
     "sweetalert2": "^11.26.24",
     "vue-router": "^5.0.4"
-  }
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "scripts": {
+  "server": "node back/index.js",
+  "client": "npm run dev --prefix front",
+  "dev": "concurrently \"npm run server\" \"npm run client\""
+}
 }

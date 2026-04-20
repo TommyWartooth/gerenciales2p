@@ -152,38 +152,60 @@
 import { ref, computed, reactive, onMounted, defineEmits } from 'vue'
 import '../../../assets/admin.css'
 
-// Definición de eventos para comunicación con el padre
 const emit = defineEmits(['set-titulo'])
-
-onMounted(() => {
-  // Solo emitimos si es necesario para tu Layout
-  emit('set-titulo', 'Platos')
-})
 
 const busqueda = ref('')
 const mostrarNuevo = ref(false)
 const platoEditando = ref(null)
+const platos = ref([])
 
-const categorias = [
-  { idcategoria: 1, nombre: 'Entradas' },
-  { idcategoria: 2, nombre: 'Platos Principales' },
-  { idcategoria: 3, nombre: 'Postres' },
-  { idcategoria: 4, nombre: 'Bebidas' },
-]
+const categorias = ref([
+  { idcategoria: 1, nombre: "Bebidas" },
+  { idcategoria: 2, nombre: "Platos fuertes" },
+  { idcategoria: 3, nombre: "Entradas" },
+  { idcategoria: 4, nombre: "Postres" },
+]);
 
-const platos = ref([
-  { id_plato: 1, nombre: 'Pique Macho', costo_unitario: 75, disponibilidad: true, idcategoria: 2 },
-  { id_plato: 2, nombre: 'Sajta de Pollo', costo_unitario: 65, disponibilidad: true, idcategoria: 2 },
-  { id_plato: 3, nombre: 'Silpancho', costo_unitario: 70, disponibilidad: true, idcategoria: 2 },
-  { id_plato: 4, nombre: 'Fricasé Real', costo_unitario: 80, disponibilidad: false, idcategoria: 2 },
-  { id_plato: 5, nombre: 'Majadito de Charque', costo_unitario: 60, disponibilidad: true, idcategoria: 2 },
-])
+// 1. CARGAR PLATOS
+async function cargarPlatos() {
+  try {
+    const token = localStorage.getItem('token'); 
+    const resp = await fetch("http://localhost:3000/api/platos", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` 
+      }
+    });
 
-const platosFiltrados = computed(() =>
-  platos.value.filter(p => p.nombre.toLowerCase().includes(busqueda.value.toLowerCase()))
-)
+    if (resp.status === 401) {
+      console.warn("El token no sirve o expiró.");
+      return;
+    }
 
-// Formularios reactivos
+    const data = await resp.json();
+    const listaDePlatos = Array.isArray(data) ? data : (data.platos || data.data || []);
+
+    platos.value = listaDePlatos.map((p) => ({
+      id_plato: p.id_plato || p.idplato || p.id, 
+      nombre: p.nombre,
+      costo_unitario: Number(p.costo_unitario),
+      descripcion: p.descripcion,
+      disponibilidad: p.disponibilidad,
+      idcategoria: p.idcategoria,
+      imagen: p.imagen,
+    }));
+  } catch (err) {
+    console.error("Error fatal:", err);
+  }
+}
+
+onMounted(() => {
+  emit('set-titulo', 'Platos')
+  cargarPlatos();
+});
+
+// 2. FORMULARIOS REACTIVOS
 const form = reactive({ 
   nombre: '', 
   costo_unitario: null, 
@@ -195,6 +217,7 @@ const form = reactive({
 })
 
 const formEditar = reactive({
+  id_plato: null,
   nombre: '', 
   costo_unitario: null, 
   descripcion: '', 
@@ -202,52 +225,113 @@ const formEditar = reactive({
   idcategoria: ''
 })
 
+// 3. GUARDAR NUEVO (POST)
+const guardarNuevo = async () => {
+  if (!form.nombre || !form.costo_unitario) { 
+    alert('Completa los campos obligatorios')
+    return 
+  }
+
+  try {
+    const token = localStorage.getItem('token'); 
+    const resp = await fetch("http://localhost:3000/api/platos", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` 
+      },
+      body: JSON.stringify(form),
+    });
+
+    if (!resp.ok) {
+      if(resp.status === 401) throw new Error("Sesión expirada o sin permisos");
+      throw new Error("Error al crear plato");
+    }
+
+    await cargarPlatos(); 
+    mostrarNuevo.value = false; // <-- YA DESCOMENTADO: Esto cierra el modal al guardar
+    
+    // Resetear formulario
+    Object.assign(form, { nombre: '', costo_unitario: null, descripcion: '', disponibilidad: true, idcategoria: '', imagen: '', previewUrl: null });
+    alert("Plato creado con éxito");
+  } catch (error) {
+    alert("No se pudo guardar: " + error.message);
+  }
+}
+
+// 4. EDITAR (PUT)
+const abrirEditar = (p) => {
+  platoEditando.value = p; // <-- YA DESCOMENTADO: Esto abre el modal de edición
+  Object.assign(formEditar, { ...p })
+}
+
+const guardarEditar = async () => {
+  try {
+    const id = formEditar.id_plato;
+    const token = localStorage.getItem('token'); 
+
+    const resp = await fetch(`http://localhost:3000/api/platos/${id}`, {
+      method: "PUT",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` 
+      },
+      body: JSON.stringify(formEditar),
+    });
+
+    if (!resp.ok) {
+      if(resp.status === 401) throw new Error("Sesión expirada o sin permisos");
+      throw new Error("Error al actualizar");
+    }
+
+    await cargarPlatos();
+    platoEditando.value = null; // <-- YA DESCOMENTADO: Esto cierra el modal al actualizar
+    alert("Plato actualizado correctamente");
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
+}
+
+// 5. ELIMINAR (DELETE)
+const eliminar = async (p) => {
+  if (!confirm(`¿Seguro que deseas eliminar "${p.nombre}"?`)) return;
+
+  try {
+    const id = p.id_plato;
+    const token = localStorage.getItem('token'); 
+
+    const resp = await fetch(`http://localhost:3000/api/platos/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}` 
+      }
+    });
+
+    if (!resp.ok) {
+      if(resp.status === 401) throw new Error("Sesión expirada o sin permisos");
+      throw new Error("No se pudo eliminar de la BD");
+    }
+
+    await cargarPlatos(); 
+    alert("Plato eliminado");
+  } catch (error) {
+    alert("Error al eliminar: " + error.message);
+  }
+}
+
+// 6. FILTRO DE BÚSQUEDA
+const platosFiltrados = computed(() =>
+  (platos.value || []).filter(p => p.nombre.toLowerCase().includes(busqueda.value.toLowerCase()))
+)
+
+// 7. FOTO
 const onFoto = (e) => {
   const file = e.target.files[0]
   if (!file) return
   form.imagen = `/imagenes/platos/${file.name}`
   form.previewUrl = URL.createObjectURL(file)
 }
-
-const guardarNuevo = () => {
-  if (!form.nombre || !form.costo_unitario) { 
-    alert('Completa los campos obligatorios')
-    return 
-  }
-  platos.value.push({ ...form, id_plato: Date.now() })
-  mostrarNuevo.value = false
-  // Resetear formulario
-  Object.assign(form, { 
-    nombre: '', 
-    costo_unitario: null, 
-    descripcion: '', 
-    disponibilidad: true, 
-    idcategoria: '', 
-    imagen: '', 
-    previewUrl: null 
-  })
-}
-
-const abrirEditar = (p) => {
-  platoEditando.value = p
-  Object.assign(formEditar, { ...p })
-}
-
-const guardarEditar = () => {
-  const idx = platos.value.findIndex(p => p.id_plato === platoEditando.value.id_plato)
-  if (idx !== -1) {
-    platos.value[idx] = { ...formEditar }
-  }
-  platoEditando.value = null
-}
-
-const eliminar = (p) => {
-  if (confirm(`¿Eliminar "${p.nombre}"?`)) {
-    platos.value = platos.value.filter(x => x.id_plato !== p.id_plato)
-  }
-}
 </script>
-
 <style scoped>
 .imagen-input-row {
   padding: 0.8rem 1rem;
