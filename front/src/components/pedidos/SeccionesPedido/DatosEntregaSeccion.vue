@@ -407,6 +407,7 @@
             <div class="carrito-item-main">
               <div>
                 <span class="carrito-item-nombre">{{ item.nombre }}</span>
+                <span class="carrito-item-nombre">&nbsp&nbsp</span>
                 <span class="carrito-item-detalle">x{{ item.cantidad }}</span>
               </div>
               <span class="carrito-item-precio"> {{ item.subtotal }} bs </span>
@@ -610,13 +611,14 @@ async function confirmarDatos() {
   flex-direction: column;
 }
 
-/* cards */
+/* cards - Cambio a fondo vino profundo y borde oro dim */
 .datos-card,
 .resumen-card {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(45, 12, 18, 0.9); /* Vino oscuro */
   border-radius: 12px;
-  border: 1px solid rgba(30, 64, 175, 0.5);
+  border: 1px solid rgba(184, 134, 11, 0.4); /* Oro mate */
   padding: 0.85rem 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
 /* header de card */
@@ -632,14 +634,15 @@ async function confirmarDatos() {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #fde68a;
+  color: #facc15; /* Dorado */
 }
 
+/* Botones de acción circulares */
 .icon-btn {
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  background: rgba(15, 23, 42, 0.9);
-  color: #e5e7eb;
+  border: 1px solid rgba(184, 134, 11, 0.6);
+  background: rgba(61, 17, 30, 0.8);
+  color: #fde68a;
   width: 30px;
   height: 30px;
   font-size: 0.85rem;
@@ -647,11 +650,12 @@ async function confirmarDatos() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: all 0.2s ease;
 }
 
 .icon-btn:hover {
-  background: rgba(55, 65, 81, 0.9);
+  background: #8c3b3b; /* Terracota */
+  color: white;
 }
 
 .icon-btn:active {
@@ -666,6 +670,7 @@ async function confirmarDatos() {
 .datos-resumen {
   margin: 0.1rem 0;
   opacity: 0.9;
+  color: #f9fafb;
 }
 
 .datos-resumen--vacio {
@@ -696,13 +701,13 @@ async function confirmarDatos() {
 
 .campo-label {
   font-weight: 600;
-  color: #e5e7eb;
+  color: #fde68a; /* Amarillo suave */
 }
 
 .campo-control {
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.8);
-  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(20, 20, 20, 0.6);
   color: #f9fafb;
   padding: 0.35rem 0.7rem;
   font-size: 0.8rem;
@@ -742,20 +747,21 @@ async function confirmarDatos() {
 
 .radio-row input,
 .check-row input {
-  accent-color: #eab308;
+  accent-color: #eab308; /* Oro */
 }
 
+/* Subcards de selección */
 .subcard {
   border-radius: 10px;
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(51, 65, 85, 0.7);
+  background: rgba(61, 17, 30, 0.4);
+  border: 1px solid rgba(184, 134, 11, 0.3);
   padding: 0.6rem 0.7rem;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
 }
 
-/* buttons */
+/* buttons con el degradado cobre/andino */
 .acciones-form {
   display: flex;
   justify-content: flex-end;
@@ -763,9 +769,9 @@ async function confirmarDatos() {
   margin-top: 0.3rem;
 }
 
-.btn-primario,
-.btn-secundario,
-.btn-confirmar {
+.btn-primario {
+  background: linear-gradient(135deg, #945932 0%, #87432e 100%); /* Cobre andino */
+  color: white;
   border-radius: 999px;
   padding: 0.35rem 0.9rem;
   font-size: 0.8rem;
@@ -774,32 +780,33 @@ async function confirmarDatos() {
   border: none;
 }
 
-.btn-primario {
-  background: #facc15;
-  color: #0b1720;
-}
-
 .btn-secundario {
   background: transparent;
   border: 1px solid rgba(148, 163, 184, 0.7);
   color: #e5e7eb;
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .btn-confirmar {
   width: 100%;
   margin-top: 0.4rem;
-  background: #166534;
+  background: #166534; /* Verde bosque */
   color: #f9fafb;
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
 }
 
 .btn-primario:hover,
 .btn-confirmar:hover {
-  filter: brightness(1.05);
-}
-
-/* footer */
-.datos-footer {
-  margin-top: 0.4rem;
+  filter: brightness(1.15);
 }
 
 /* resumen carrito (col der) */
@@ -812,43 +819,26 @@ async function confirmarDatos() {
   margin-bottom: 0.4rem;
 }
 
-.mensaje-vacio {
-  font-size: 0.85rem;
-  opacity: 0.8;
-}
-
 .carrito-lista {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.4rem;
   list-style: none;
   margin: 0.3rem 0 0;
   padding: 0;
 }
 
 .carrito-item {
-  padding: 0.35rem 0.4rem;
+  padding: 0.45rem 0.6rem;
   border-radius: 8px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(55, 65, 81, 0.7);
-}
-
-.carrito-item-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: rgba(61, 17, 30, 0.7); /* Estilo pedido nuevo */
+  border: 1px solid rgba(184, 134, 11, 0.2);
 }
 
 .carrito-item-nombre {
   font-size: 0.8rem;
   font-weight: 600;
   color: #facc15;
-}
-
-.carrito-item-detalle {
-  display: block;
-  font-size: 0.75rem;
-  opacity: 0.8;
 }
 
 .carrito-item-precio {
@@ -859,12 +849,13 @@ async function confirmarDatos() {
 
 .carrito-total {
   margin-top: 0.5rem;
-  border-top: 1px dashed rgba(148, 163, 184, 0.6);
+  border-top: 1px dashed rgba(184, 134, 11, 0.5);
   padding-top: 0.4rem;
   display: flex;
   justify-content: space-between;
   font-size: 0.9rem;
   font-weight: 600;
+  color: #f9fafb;
 }
 
 .carrito-total-monto {
