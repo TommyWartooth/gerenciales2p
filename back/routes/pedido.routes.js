@@ -15,4 +15,6 @@ router.get("/", getAllPedidos);
 
 router.patch("/:nropedido/estado", actualizarEstadoPedido);
 
+router.post("/", crearPedido);
+
 export default router;

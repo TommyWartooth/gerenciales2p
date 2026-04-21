@@ -87,7 +87,7 @@ onMounted(cargarPlatos);
   gap: 0.7rem;
   padding: 0.55rem 0.7rem;
   border-radius: 10px;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(42, 15, 15, 0.6);
   border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
