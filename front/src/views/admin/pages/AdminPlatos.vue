@@ -2,6 +2,13 @@
   <div class="admin-page">
     <div class="admin-page__toolbar">
       <input v-model="busqueda" class="admin-input-search" placeholder="Buscar plato..." />
+      <!-- FILTRO CATEGORÍA -->
+      <select v-model="filtroCategoria" class="admin-input-search">
+        <option :value="0">Todas las categorías</option>
+        <option v-for="c in categorias" :key="c.idcategoria" :value="c.idcategoria">
+          {{ c.nombre }}
+        </option>
+      </select>
       <button class="btn-admin-primary" @click="mostrarNuevo = true">+ Nuevo plato</button>
     </div>
 
@@ -38,6 +45,7 @@
       </table>
     </div>
 
+    <!-- MODAL NUEVO -->
     <div v-if="mostrarNuevo" class="modal-backdrop" @click.self="mostrarNuevo = false">
       <div class="modal">
         <header class="modal-header">
@@ -97,6 +105,7 @@
       </div>
     </div>
 
+    <!-- MODAL EDITAR -->
     <div v-if="platoEditando" class="modal-backdrop" @click.self="platoEditando = null">
       <div class="modal">
         <header class="modal-header">
@@ -138,6 +147,16 @@
             <label>Descripción</label>
             <textarea v-model="formEditar.descripcion" rows="3"></textarea>
           </div>
+          <!-- IMAGEN EN EDITAR -->
+          <div class="campo">
+            <label>Imagen</label>
+            <div class="imagen-input-row">
+              <input type="file" accept="image/*" @change="onFotoEditar" />
+            </div>
+            <div v-if="formEditar.previewUrl || formEditar.imagen" class="imagen-preview">
+              <img :src="formEditar.previewUrl || formEditar.imagen" alt="preview" />
+            </div>
+          </div>
         </section>
         <footer class="modal-footer">
           <button class="btn-admin-secondary" @click="platoEditando = null">Cancelar</button>
@@ -149,12 +168,13 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted, defineEmits } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import '../../../assets/admin.css'
 
 const emit = defineEmits(['set-titulo'])
 
 const busqueda = ref('')
+const filtroCategoria = ref(0)
 const mostrarNuevo = ref(false)
 const platoEditando = ref(null)
 const platos = ref([])
@@ -164,174 +184,171 @@ const categorias = ref([
   { idcategoria: 2, nombre: "Platos fuertes" },
   { idcategoria: 3, nombre: "Entradas" },
   { idcategoria: 4, nombre: "Postres" },
-]);
+])
 
-// 1. CARGAR PLATOS
+//PLATOS
 async function cargarPlatos() {
   try {
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token')
     const resp = await fetch("http://localhost:3000/api/platos", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}` 
+        "Authorization": `Bearer ${token}`
       }
-    });
+    })
 
     if (resp.status === 401) {
-      console.warn("El token no sirve o expiró.");
-      return;
+      console.warn("El token no sirve o expiró.")
+      return
     }
 
-    const data = await resp.json();
-    const listaDePlatos = Array.isArray(data) ? data : (data.platos || data.data || []);
+    const data = await resp.json()
+    const listaDePlatos = Array.isArray(data) ? data : (data.platos || data.data || [])
 
     platos.value = listaDePlatos.map((p) => ({
-      id_plato: p.id_plato || p.idplato || p.id, 
+      id_plato: p.id_plato || p.idplato || p.id,
       nombre: p.nombre,
       costo_unitario: Number(p.costo_unitario),
       descripcion: p.descripcion,
       disponibilidad: p.disponibilidad,
       idcategoria: p.idcategoria,
       imagen: p.imagen,
-    }));
+    }))
   } catch (err) {
-    console.error("Error fatal:", err);
+    console.error("Error fatal:", err)
   }
 }
 
 onMounted(() => {
   emit('set-titulo', 'Platos')
-  cargarPlatos();
-});
+  cargarPlatos()
+})
 
-// 2. FORMULARIOS REACTIVOS
-const form = reactive({ 
-  nombre: '', 
-  costo_unitario: null, 
-  descripcion: '', 
-  disponibilidad: true, 
-  idcategoria: '', 
-  imagen: '', 
-  previewUrl: null 
+// REACTIVOS
+const form = reactive({
+  nombre: '',
+  costo_unitario: null,
+  descripcion: '',
+  disponibilidad: true,
+  idcategoria: '',
+  imagen: '',
+  previewUrl: null
 })
 
 const formEditar = reactive({
   id_plato: null,
-  nombre: '', 
-  costo_unitario: null, 
-  descripcion: '', 
-  disponibilidad: true, 
-  idcategoria: ''
+  nombre: '',
+  costo_unitario: null,
+  descripcion: '',
+  disponibilidad: true,
+  idcategoria: '',
+  imagen: '',
+  previewUrl: null
 })
 
-// 3. GUARDAR NUEVO (POST)
-const guardarNuevo = async () => {
-  if (!form.nombre || !form.costo_unitario) { 
-    alert('Completa los campos obligatorios')
-    return 
-  }
 
+const guardarNuevo = async () => {
+  if (!form.nombre || !form.costo_unitario) {
+    alert('Completa los campos obligatorios')
+    return
+  }
   try {
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token')
     const resp = await fetch("http://localhost:3000/api/platos", {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}` 
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify(form),
-    });
-
+    })
     if (!resp.ok) {
-      if(resp.status === 401) throw new Error("Sesión expirada o sin permisos");
-      throw new Error("Error al crear plato");
+      if (resp.status === 401) throw new Error("Sesión expirada o sin permisos")
+      throw new Error("Error al crear plato")
     }
-
-    await cargarPlatos(); 
-    mostrarNuevo.value = false; // <-- YA DESCOMENTADO: Esto cierra el modal al guardar
-    
-    // Resetear formulario
-    Object.assign(form, { nombre: '', costo_unitario: null, descripcion: '', disponibilidad: true, idcategoria: '', imagen: '', previewUrl: null });
-    alert("Plato creado con éxito");
+    await cargarPlatos()
+    mostrarNuevo.value = false
+    Object.assign(form, { nombre: '', costo_unitario: null, descripcion: '', disponibilidad: true, idcategoria: '', imagen: '', previewUrl: null })
+    alert("Plato creado con éxito")
   } catch (error) {
-    alert("No se pudo guardar: " + error.message);
+    alert("No se pudo guardar: " + error.message)
   }
 }
 
-// 4. EDITAR (PUT)
+
 const abrirEditar = (p) => {
-  platoEditando.value = p; // <-- YA DESCOMENTADO: Esto abre el modal de edición
-  Object.assign(formEditar, { ...p })
+  platoEditando.value = p
+  Object.assign(formEditar, { ...p, previewUrl: null })
 }
 
 const guardarEditar = async () => {
   try {
-    const id = formEditar.id_plato;
-    const token = localStorage.getItem('token'); 
-
+    const id = formEditar.id_plato
+    const token = localStorage.getItem('token')
     const resp = await fetch(`http://localhost:3000/api/platos/${id}`, {
       method: "PUT",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}` 
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify(formEditar),
-    });
-
+    })
     if (!resp.ok) {
-      if(resp.status === 401) throw new Error("Sesión expirada o sin permisos");
-      throw new Error("Error al actualizar");
+      if (resp.status === 401) throw new Error("Sesión expirada o sin permisos")
+      throw new Error("Error al actualizar")
     }
-
-    await cargarPlatos();
-    platoEditando.value = null; // <-- YA DESCOMENTADO: Esto cierra el modal al actualizar
-    alert("Plato actualizado correctamente");
+    await cargarPlatos()
+    platoEditando.value = null
+    alert("Plato actualizado correctamente")
   } catch (error) {
-    alert("Error: " + error.message);
+    alert("Error: " + error.message)
   }
 }
 
-// 5. ELIMINAR (DELETE)
 const eliminar = async (p) => {
-  if (!confirm(`¿Seguro que deseas eliminar "${p.nombre}"?`)) return;
-
+  if (!confirm(`¿Seguro que deseas eliminar "${p.nombre}"?`)) return
   try {
-    const id = p.id_plato;
-    const token = localStorage.getItem('token'); 
-
+    const id = p.id_plato
+    const token = localStorage.getItem('token')
     const resp = await fetch(`http://localhost:3000/api/platos/${id}`, {
       method: "DELETE",
-      headers: {
-        "Authorization": `Bearer ${token}` 
-      }
-    });
-
+      headers: { "Authorization": `Bearer ${token}` }
+    })
     if (!resp.ok) {
-      if(resp.status === 401) throw new Error("Sesión expirada o sin permisos");
-      throw new Error("No se pudo eliminar de la BD");
+      if (resp.status === 401) throw new Error("Sesión expirada o sin permisos")
+      throw new Error("No se pudo eliminar de la BD")
     }
-
-    await cargarPlatos(); 
-    alert("Plato eliminado");
+    await cargarPlatos()
+    alert("Plato eliminado")
   } catch (error) {
-    alert("Error al eliminar: " + error.message);
+    alert("Error al eliminar: " + error.message)
   }
 }
 
-// 6. FILTRO DE BÚSQUEDA
 const platosFiltrados = computed(() =>
-  (platos.value || []).filter(p => p.nombre.toLowerCase().includes(busqueda.value.toLowerCase()))
+  (platos.value || []).filter(p => {
+    const coincideNombre = p.nombre.toLowerCase().includes(busqueda.value.toLowerCase())
+    const coincideCategoria = filtroCategoria.value === 0 || p.idcategoria === filtroCategoria.value
+    return coincideNombre && coincideCategoria
+  })
 )
 
-// 7. FOTO
 const onFoto = (e) => {
   const file = e.target.files[0]
   if (!file) return
   form.imagen = `/imagenes/platos/${file.name}`
   form.previewUrl = URL.createObjectURL(file)
 }
+
+const onFotoEditar = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  formEditar.imagen = `/imagenes/platos/${file.name}`
+  formEditar.previewUrl = URL.createObjectURL(file)
+}
 </script>
+
 <style scoped>
 .imagen-input-row {
   padding: 0.8rem 1rem;
@@ -340,16 +357,16 @@ const onFoto = (e) => {
   background: rgba(255,255,255,0.02);
   cursor: pointer;
 }
-.imagen-preview { 
-  margin-top: 0.8rem; 
-  max-width: 200px; 
-  border-radius: 4px; 
-  overflow: hidden; 
-  border: 1px solid rgba(235,205,149,0.2); 
+.imagen-preview {
+  margin-top: 0.8rem;
+  max-width: 200px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(235,205,149,0.2);
 }
-.imagen-preview img { 
-  width: 100%; 
-  height: auto; 
+.imagen-preview img {
+  width: 100%;
+  height: auto;
   display: block;
 }
 </style>
