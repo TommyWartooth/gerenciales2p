@@ -13,10 +13,9 @@
 
         <div class="section-actions">
           <select v-model="filtroDoc" class="admin-input-search" style="width: auto;">
-            <option value="todos">Todos los tipos</option>
-            <option value="NIT">NIT</option>
-            <option value="Carnet">Carnet</option>
-            <option value="Ninguno">Ninguno</option>
+            <option value="todos">Todos los clientes</option>
+            <option value="con_nit">Con NIT</option>
+            <option value="sin_nit">Sin NIT (Solo CI)</option>
           </select>
 
           <input
@@ -34,16 +33,12 @@
           <span class="stat-value">{{ stats.total }}</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Con NIT</span>
+          <span class="stat-label">Con NIT Registrado</span>
           <span class="stat-value">{{ stats.conNIT }}</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Con Carnet</span>
-          <span class="stat-value">{{ stats.conCarnet }}</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Sin doc. (Ninguno)</span>
-          <span class="stat-value">{{ stats.sinDoc }}</span>
+          <span class="stat-label">Sin NIT (Consumidor Final)</span>
+          <span class="stat-value">{{ stats.sinNIT }}</span>
         </div>
       </div>
 
@@ -53,37 +48,42 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import ClientesTabla from "../../../components/admin/Tabla/ClientesTabla.vue";
 import "../../../assets/admin.css";
 
+// Estado de los clientes traídos de la BD
+const clientes = ref([]);
+
+const getHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  }
+}
+
 // ==========================
-// DATOS MOCK (luego BD)
+// CARGAR DESDE LA API
 // ==========================
-// 👇 Ahora la clave es "documento"
-const clientes = ref([
-  {
-    documento: "12345678",
-    nombre: "Juan",
-    apellido: "Pérez",
-    tipo_doc: "NIT",
-    correo: "juan.perez@example.com",
-  },
-  {
-    documento: "87654321",
-    nombre: "Mauricio",
-    apellido: "López",
-    tipo_doc: "Carnet",
-    correo: "maria.lopez@example.com",
-  },
-  {
-    documento: "99999999",
-    nombre: "Carlos",
-    apellido: "Rojas",
-    tipo_doc: "Ninguno",
-    correo: "carlos.rojas@example.com",
-  },
-]);
+const cargarClientes = async () => {
+  try {
+    const res = await fetch('http://localhost:3000/api/usuarios/clientes', {
+      headers: getHeaders()
+    });
+    if (res.ok) {
+      clientes.value = await res.json();
+    } else {
+      console.error("Error al cargar clientes");
+    }
+  } catch (error) {
+    console.error("Error de conexión:", error);
+  }
+}
+
+onMounted(() => {
+  cargarClientes();
+});
 
 // ==========================
 // FILTRO + BUSQUEDA
@@ -96,16 +96,23 @@ const clientesFiltrados = computed(() => {
   const doc = filtroDoc.value;
 
   return clientes.value.filter((c) => {
-    const nombreCompleto = `${c.nombre} ${c.apellido}`.toLowerCase();
+    const nombreCompleto = `${c.nombre} ${c.apellidos}`.toLowerCase();
 
+    // Buscar por texto (CI, Nombre o Correo)
     const coincideTexto =
       !b ||
       (c.documento && c.documento.toString().includes(b)) ||
       nombreCompleto.includes(b) ||
-      (c.correo && c.correo.toLowerCase().includes(b));
+      (c.correo && c.correo.toLowerCase().includes(b)) ||
+      (c.nit && c.nit.toLowerCase().includes(b));
 
-    const coincideDoc =
-      doc === "todos" || c.tipo_doc.toLowerCase() === doc.toLowerCase();
+    // Filtrar por estado del NIT
+    let coincideDoc = true;
+    if (doc === "con_nit") {
+      coincideDoc = c.nit && c.nit.trim() !== "";
+    } else if (doc === "sin_nit") {
+      coincideDoc = !c.nit || c.nit.trim() === "";
+    }
 
     return coincideTexto && coincideDoc;
   });
@@ -116,31 +123,42 @@ const clientesFiltrados = computed(() => {
 // ==========================
 const stats = computed(() => {
   const total = clientes.value.length;
-  const conNIT = clientes.value.filter(
-    (c) => c.tipo_doc.toLowerCase() === "nit"
-  ).length;
-  const conCarnet = clientes.value.filter(
-    (c) => c.tipo_doc.toLowerCase() === "carnet"
-  ).length;
-  const sinDoc = clientes.value.filter(
-    (c) => c.tipo_doc.toLowerCase() === "ninguno"
-  ).length;
+  const conNIT = clientes.value.filter(c => c.nit && c.nit.trim() !== "").length;
+  const sinNIT = total - conNIT;
 
-  return { total, conNIT, conCarnet, sinDoc };
+  return { total, conNIT, sinNIT };
 });
 
 // ==========================
 // ELIMINAR
 // ==========================
-// ahora eliminamos por "documento"
-function eliminarCliente(cliente) {
-  console.log("Eliminar cliente:", cliente);
-  clientes.value = clientes.value.filter(
-    (c) => c.documento !== cliente.documento
-  );
+async function eliminarCliente(cliente) {
+  if (confirm(`¿Estás seguro de eliminar al cliente ${cliente.nombre} ${cliente.apellidos}?`)) {
+    try {
+      // Como el borrado de clientes no lo armamos en el controller (solo el de personal), 
+      // de momento lo borramos del frontend. 
+      // ¡Aviso!: Si quieres que se borre de la BD real, deberás hacer la ruta DELETE en backend.
+      
+      /* Si tuvieras la ruta hecha, harías esto:
+      const res = await fetch(`http://localhost:3000/api/usuarios/clientes/${cliente.documento}`, {
+        method: 'DELETE',
+        headers: getHeaders()
+      });
+      if (res.ok) {
+        await cargarClientes();
+      }
+      */
+      
+      // Simulación de borrado local por ahora
+      clientes.value = clientes.value.filter(c => c.documento !== cliente.documento);
+      console.log("Cliente eliminado localmente.");
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }
 </script>
-
 <style scoped>
 .admin-section {
   display: flex;

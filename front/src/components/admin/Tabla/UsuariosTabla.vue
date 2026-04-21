@@ -1,51 +1,27 @@
 <template>
-  <div class="table-wrapper">
+  <div class="tabla-wrap">
     <table class="admin-table">
       <thead>
         <tr>
           <th>Documento (CI)</th>
-          <th>Nombre completo</th>
-          <th>Rol</th>
-          <th>Fecha de contrato</th>
-          <th>Celular</th>
-          <th>Acciones</th>
+          <th>Nombre</th>
+          <th>NIT</th>
+          <th>Razón Social</th>
+          <th>Correo</th>
         </tr>
       </thead>
 
       <tbody>
-        <tr v-for="u in usuarios" :key="u.documento">
-          <!-- DOCUMENTO -->
-          <td>{{ u.documento }}</td>
-
-          <!-- NOMBRE + APELLIDOS -->
-          <td>{{ u.nombre }} {{ u.apellidos }}</td>
-
-          <!-- ROL -->
-          <td>{{ u.rolNombre }}</td>
-
-          <!-- FECHA CONTRATO -->
-          <td>{{ u.fecha_contrato }}</td>
-
-          <!-- CELULAR -->
-          <td>{{ u.celular }}</td>
-
-          <!-- ACCIONES -->
-          <td>
-            <button class="btn-accion btn-editar" @click="$emit('editar', u)">
-              ✏️ Modificar
-            </button>
-
-            <button
-              class="btn-accion btn-eliminar"
-              @click="$emit('eliminar', u)"
-            >
-              🗑 Eliminar
-            </button>
-          </td>
+        <tr v-for="c in clientes" :key="c.documento">
+          <td>{{ c.documento }}</td>
+          <td>{{ c.nombre }} {{ c.apellidos }}</td>
+          <td>{{ c.nit || 'S/N' }}</td>
+          <td>{{ c.razon_social || 'N/A' }}</td>
+          <td>{{ c.correo }}</td>
         </tr>
 
-        <tr v-if="!usuarios || usuarios.length === 0">
-          <td colspan="6">No se encontraron usuarios.</td>
+        <tr v-if="!clientes || clientes.length === 0">
+          <td colspan="5" class="tabla-vacia">No se encontraron clientes o cargando...</td>
         </tr>
       </tbody>
     </table>
@@ -53,14 +29,43 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  usuarios: {
-    type: Array,
-    default: () => [],
-  },
+import { ref, onMounted } from 'vue';
+
+const clientes = ref([]);
+
+const getHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  }
+}
+
+const cargarClientes = async () => {
+  try {
+    const res = await fetch('http://localhost:3000/api/usuarios/clientes', {
+      headers: getHeaders()
+    });
+    
+    if (res.ok) {
+      clientes.value = await res.json();
+    } else {
+      console.error("No tienes permisos o hubo un error al cargar clientes");
+    }
+  } catch (error) {
+    console.error("Error de red:", error);
+  }
+};
+
+// Carga los clientes automáticamente cuando la tabla se muestra
+onMounted(() => {
+  cargarClientes();
 });
 </script>
 
+<style scoped>
+@import "../../../assets/admin.css"; /* Asegúrate de que esta ruta sea válida para este archivo */
+</style>
 <style scoped>
 .table-wrapper {
   margin-top: 8px;

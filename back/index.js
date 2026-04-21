@@ -4,10 +4,10 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import cors from "cors";
 
-// --- IMPORTACIONES DE RUTAS (Tus rutas + las nuevas) ---
+// --- IMPORTACIONES DE RUTAS ---
 import pedidoRouter from "./routes/pedido.routes.js";
-import usuarioRoutes from "./routes/usuarioRoutes.js"; // Tus rutas
-import platoRoutes from "./routes/platoRoutes.js";     // Tus rutas
+import usuarioRoutes from "./routes/usuarioRoutes.js"; // ¡Aquí traes tus rutas de usuarios!
+import platoRoutes from "./routes/platoRoutes.js";
 import { pool } from "./db/pool.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,13 +28,17 @@ app.use(
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  }),
+  })
 );
 
-// --- TUS RUTAS ---
+// ==========================================
+// --- TUS ENDPOINTS (RUTAS BASE) ---
+// ==========================================
+
+// ¡Y aquí es donde las conectas! Todo lo de usuarios vivirá en /api/usuarios/...
 app.use('/api/usuarios', usuarioRoutes); 
 app.use('/api/platos', platoRoutes);
-app.use("/api/pedidos", pedidoRouter); // La ruta que subió tu compa
+app.use("/api/pedidos", pedidoRouter);
 
 // Endpoint de salud mejorado
 app.get("/api/health", (_req, res) => {
@@ -46,11 +50,14 @@ app.get('/', (req, res) => {
     res.send('ola unu');
 });
 
-// Conexión a la BD
+// ==========================================
+// --- CONEXIÓN A BD Y ARRANQUE ---
+// ==========================================
+
 pool
   .connect()
   .then((client) => {
-    console.log("Conectado a PostgreSQL correctamente");
+    console.log("Conectado a PostgreSQL correctamente uwu");
     client.release();
   })
   .catch((err) => {
