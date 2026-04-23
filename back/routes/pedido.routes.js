@@ -11,10 +11,12 @@ import {
 
 const router = Router();
 
-router.get("/", getAllPedidos);
+// Esta es la ruta buena que ya tenías y que devuelve la lista
+router.get("/", getAllPedidos); 
+
+// Borramos el router.get('/pedidos'...) extra que pusimos para que no choque
 
 router.patch("/:nropedido/estado", actualizarEstadoPedido);
-
 router.post("/", crearPedido);
 
 export default router;

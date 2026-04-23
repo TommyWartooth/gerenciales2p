@@ -1,135 +1,120 @@
 <template>
-  <section class="admin-section">
-    <header class="admin-section-header">
-      <div>
-        <div class="breadcrumbs">Administración / Pedidos</div>
-        <h2 class="section-title">Pedidos realizados</h2>
-        <p class="section-desc">
-          Consulta y revisa los pedidos registrados en el sistema.
-        </p>
-      </div>
-
-      <div class="section-actions">
-        <input
-          v-model="busqueda"
-          type="text"
-          class="search-input"
-          placeholder="Buscar por ID o cliente..."
-        />
-      </div>
+  <section class="admin-view">
+    <header class="admin-header">
+      <h2>Gestión de Pedidos</h2>
     </header>
 
-    <div class="stats-row">
-      <div class="stat-card">
-        <span class="stat-label">Pedidos totales</span>
-        <span class="stat-value">{{ stats.totalPedidos }}</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Ingresos totales (Bs.)</span>
-        <span class="stat-value">{{ stats.ingresosTotales }}</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Entregas a domicilio</span>
-        <span class="stat-value">{{ stats.entregasDomicilio }}</span>
-      </div>
-    </div>
+    <PedidosTabla 
+      :pedidos="listaPedidos" 
+      @ver="abrirDetallePedido" 
+    />
 
-    <PedidosTabla :pedidos="pedidosFiltrados" @ver="verPedido" />
+    <div v-if="mostrarModal" class="modal-overlay" @click.self="cerrarModal">
+      <div class="modal-content">
+        <header class="modal-header">
+          <h3>Detalle del Pedido #{{ pedidoSeleccionado?.id }}</h3>
+          <button class="btn-cerrar" @click="cerrarModal">✖</button>
+        </header>
 
-    <div v-if="pedidoSeleccionado" class="admin-theme">
-      <PedidoDetalleModal
-        :pedido="pedidoSeleccionado"
-        @cerrar="pedidoSeleccionado = null"
-      />
+        <div class="modal-body" v-if="pedidoSeleccionado">
+          
+          <div class="detalle-seccion">
+            <h4>Datos del Cliente</h4>
+            <p><strong>Nombre:</strong> {{ pedidoSeleccionado.cliente }}</p>
+            <p v-if="pedidoSeleccionado.correoCliente"><strong>Correo:</strong> {{ pedidoSeleccionado.correoCliente }}</p>
+            <p><strong>Modalidad:</strong> {{ pedidoSeleccionado.modalidad }}</p>
+            <p v-if="pedidoSeleccionado.direccion"><strong>Dirección:</strong> {{ pedidoSeleccionado.direccion }}</p>
+            <p><strong>Estado Actual:</strong> {{ pedidoSeleccionado.estado }}</p>
+          </div>
+
+          <div class="detalle-seccion">
+            <h4>Detalle de Platos</h4>
+            <table class="tabla-detalles" style="width: 100%; text-align: left; border-collapse: collapse;">
+              <thead>
+                <tr style="border-bottom: 2px solid #eee;">
+                  <th style="padding-bottom: 5px;">Cant.</th>
+                  <th style="padding-bottom: 5px;">Plato</th>
+                  <th style="padding-bottom: 5px;">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in pedidoSeleccionado.items" :key="item.idplato" style="border-bottom: 1px solid #f5f5f5;">
+                  <td style="padding: 8px 0;">{{ item.cantidad }}x</td>
+                  <td style="padding: 8px 0;">{{ item.nombre }}</td>
+                  <td style="padding: 8px 0;">Bs. {{ item.precio?.toFixed(2) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="detalle-total">
+            <h3>Total: Bs. {{ pedidoSeleccionado.total?.toFixed(2) }}</h3>
+          </div>
+          
+        </div>
+        
+        <footer class="modal-footer" style="margin-top: 20px; text-align: right;">
+          <button class="btn-primario" @click="cerrarModal" style="background-color: var(--gold, #d4af37); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            Cerrar
+          </button>
+        </footer>
+
+      </div>
     </div>
   </section>
 </template>
-
 <script setup>
-import { ref, computed } from "vue";
-import PedidosTabla from "../../../components/admin/Tabla/PedidosTabla.vue";
-import PedidoDetalleModal from "../../../components/admin/Modal/PedidoDetalleModal.vue";
-import '../../../assets/admin.css';
+import { ref, onMounted } from 'vue';
+import PedidosTabla from '@/components/admin/Tabla/PedidosTabla.vue'; // Asegúrate de que la ruta sea correcta
 
-// ==========================
-// DATOS MOCK
-// ==========================
-const pedidos = ref([
-  {
-    id: 1,
-    cliente: "Juan Pérez",
-    tipo_entrega: "Domicilio",
-    cant_bebidas: 2,
-    cant_postres: 1,
-    cant_platos: 2,
-    cant_entradas: 0,
-    total: 165.0,
-    fecha: "2025-12-01 19:30",
-    direccion: "Av. Siempre Viva 123",
-    referencia: "Frente a la plaza",
-    telefono: "70000001",
-    nit: "123456789",
-    tipo_doc: "CI",
-    items: [
-      { tipo: "Entrada", nombre: "Pastel de Queso", cantidad: 1, precio_unitario: 15.0 },
-      { tipo: "Plato fuerte", nombre: "Pique Macho Especial", cantidad: 1, precio_unitario: 80.0 },
-      { tipo: "Plato fuerte", nombre: "Sajta de Pollo", cantidad: 1, precio_unitario: 50.0 },
-      { tipo: "Bebida", nombre: "Mocochinchi Helado", cantidad: 2, precio_unitario: 10.0 },
-    ],
-  },
-  {
-    id: 2,
-    cliente: "María López",
-    tipo_entrega: "Local",
-    cant_bebidas: 0,
-    cant_postres: 1,
-    cant_platos: 1,
-    cant_entradas: 1,
-    total: 45.0,
-    fecha: "2025-12-01 20:10",
-    direccion: null,
-    referencia: null,
-    telefono: "70000002",
-    nit: null,
-    tipo_doc: "Ninguno",
-    items: [
-      { tipo: "Plato fuerte", nombre: "Silpancho Cochabambino", cantidad: 1, precio_unitario: 65.0 },
-      { tipo: "Postre", nombre: "Helado de Canela", cantidad: 1, precio_unitario: 15.0 },
-      { tipo: "Bebida", nombre: "Huari 600ml", cantidad: 1, precio_unitario: 15.0 },
-    ],
-  },
-]);
-
-const busqueda = ref("");
-
-const pedidosFiltrados = computed(() => {
-  const b = busqueda.value.toLowerCase().trim();
-  if (!b) return pedidos.value;
-
-  return pedidos.value.filter((p) =>
-    [
-      p.id.toString(),
-      p.cliente.toLowerCase(),
-      p.tipo_entrega.toLowerCase(),
-    ].some((campo) => campo.includes(b))
-  );
-});
-
-const stats = computed(() => {
-  const totalPedidos = pedidos.value.length;
-  const ingresosTotalesNum = pedidos.value.reduce((acc, p) => acc + (p.total || 0), 0);
-  const ingresosTotales = ingresosTotalesNum.toFixed(2);
-  const entregasDomicilio = pedidos.value.filter(
-    (p) => p.tipo_entrega.toLowerCase() === "domicilio"
-  ).length;
-
-  return { totalPedidos, ingresosTotales, entregasDomicilio };
-});
-
+// Estado
+const listaPedidos = ref([]); 
+const mostrarModal = ref(false);
 const pedidoSeleccionado = ref(null);
 
-function verPedido(p) {
-  pedidoSeleccionado.value = p;
+// Cargar pedidos al iniciar
+onMounted(async () => {
+  await cargarPedidos();
+});
+
+async function cargarPedidos() {
+  try {
+    // Hacemos el fetch real a tu backend
+    const res = await fetch('http://localhost:3000/api/pedidos', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error(`Error en la petición: ${res.status}`);
+    }
+
+    // Convertimos la respuesta a JSON
+    const data = await res.json();
+    
+    // Asignamos la data a nuestra variable reactiva
+    listaPedidos.value = data;
+    
+    console.log("Pedidos cargados con éxito:", listaPedidos.value);
+
+  } catch (error) {
+    console.error("Error al cargar los pedidos:", error);
+  }
+}
+
+// Función que se ejecuta cuando la tabla emite el evento "ver"
+function abrirDetallePedido(pedido) {
+  // Como tu backend ya agrupa los "items" (platos) en la consulta getAll(),
+  // el objeto 'pedido' ya trae todo lo necesario. ¡No hace falta otro fetch!
+  pedidoSeleccionado.value = pedido;
+  mostrarModal.value = true;
+}
+
+function cerrarModal() {
+  mostrarModal.value = false;
+  pedidoSeleccionado.value = null;
 }
 </script>
 
