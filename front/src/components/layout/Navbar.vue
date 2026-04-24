@@ -7,17 +7,43 @@
         </router-link>
 
         <ul class="navbar__links" :class="{ 'navbar__links--open': menuOpen }">
-          <li><router-link to="/" @click="menuOpen = false">Inicio</router-link></li>
-          <li><router-link to="/carta" @click="menuOpen = false">Carta</router-link></li>
-          <li><router-link to="/nosotros" @click="menuOpen = false">Sobre Nosotros</router-link></li>
-          <li><router-link to="/contacto" @click="menuOpen = false">Contacto</router-link></li>
+          <li>
+            <router-link to="/" @click="menuOpen = false">Inicio</router-link>
+          </li>
+          <li>
+            <router-link to="/carta" @click="menuOpen = false"
+              >Carta</router-link
+            >
+          </li>
+          <li>
+            <router-link to="/nosotros" @click="menuOpen = false"
+              >Sobre Nosotros</router-link
+            >
+          </li>
+          <li>
+            <router-link to="/contacto" @click="menuOpen = false"
+              >Contacto</router-link
+            >
+          </li>
         </ul>
 
         <div class="navbar__auth">
           <div class="user-menu" ref="userMenu">
-            <button class="user-btn" @click="toggleUserMenu" aria-label="Menu de usuario">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+            <button
+              class="user-btn"
+              @click="toggleUserMenu"
+              aria-label="Menu de usuario"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                width="24"
+                height="24"
+              >
+                <path
+                  d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
+                />
               </svg>
             </button>
 
@@ -28,57 +54,117 @@
               </template>
               <template v-else>
                 <span class="user-name">Hola, {{ nombreUsuario }}</span>
-                <router-link 
-                  v-if="auth.usuario?.rol !== 'cliente'" 
-                  :to="getDashboardLink" 
+                <router-link
+                  v-if="auth.usuario?.rol !== 'cliente'"
+                  :to="getDashboardLink"
                   @click="mostrarUserMenu = false"
                 >
                   Panel Control
                 </router-link>
-                <a href="#" @click.prevent="handleCerrarSesion">Cerrar sesión</a>
+                <a href="#" @click.prevent="handleCerrarSesion"
+                  >Cerrar sesión</a
+                >
               </template>
             </div>
           </div>
 
-          <a class="navbar__cta" href="#" @click.prevent="pedidoPanel.abrir()">Pedir Ahora</a>
+          <a
+            class="navbar__cta"
+            href="#"
+            @click.prevent="
+              estaAutenticado ? pedidoPanel.abrir() : abrirLogin()
+            "
+            >Pedir Ahora</a
+          >
         </div>
 
-        <button class="navbar__burger" @click="toggleMenu" :class="{ open: menuOpen }" aria-label="Menú">
+        <button
+          class="navbar__burger"
+          @click="toggleMenu"
+          :class="{ open: menuOpen }"
+          aria-label="Menú"
+        >
           <span></span><span></span><span></span>
         </button>
       </div>
     </nav>
 
-    <div v-if="mostrarLogin" class="modal-backdrop" @click.self="mostrarLogin = false">
+    <div
+      v-if="mostrarLogin"
+      class="modal-backdrop"
+      @click.self="mostrarLogin = false"
+    >
       <div class="modal-contenedor">
         <button class="modal-cerrar" @click="mostrarLogin = false">✕</button>
         <h2 class="modal-titulo">Iniciar Sesión</h2>
         <form @submit.prevent="ejecutarLogin">
-          <input v-model="formLogin.documento" type="text" class="modal-input" placeholder="Documento" required />
-          <input v-model="formLogin.password" type="password" class="modal-input" placeholder="Contraseña" required />
+          <input
+            v-model="formLogin.documento"
+            type="text"
+            class="modal-input"
+            placeholder="Documento"
+            required
+          />
+          <input
+            v-model="formLogin.password"
+            type="password"
+            class="modal-input"
+            placeholder="Contraseña"
+            required
+          />
           <button type="submit" class="modal-btn">Entrar</button>
         </form>
         <p class="modal-link">
-          ¿No tienes cuenta? <a href="#" @click.prevent="abrirRegistro">Registrarse</a>
+          ¿No tienes cuenta?
+          <a href="#" @click.prevent="abrirRegistro">Registrarse</a>
         </p>
       </div>
     </div>
 
-    <div v-if="mostrarRegistro" class="modal-backdrop" @click.self="mostrarRegistro = false">
+    <div
+      v-if="mostrarRegistro"
+      class="modal-backdrop"
+      @click.self="mostrarRegistro = false"
+    >
       <div class="modal-contenedor modal-contenedor--grande">
         <button class="modal-cerrar" @click="mostrarRegistro = false">✕</button>
         <h2 class="modal-titulo">Crear cuenta</h2>
         <form @submit.prevent="ejecutarRegistro" class="form-registro">
           <div class="form-grid">
-            <input v-model="formReg.nombre" type="text" class="modal-input" placeholder="Nombres" required />
-            <input v-model="formReg.apellido" type="text" class="modal-input" placeholder="Apellidos" required />
-            <input v-model="formReg.email" type="email" class="modal-input" placeholder="Correo" required />
-            <input v-model="formReg.documento" type="text" class="modal-input" placeholder="Documento" required />
+            <input
+              v-model="formReg.nombre"
+              type="text"
+              class="modal-input"
+              placeholder="Nombres"
+              required
+            />
+            <input
+              v-model="formReg.apellido"
+              type="text"
+              class="modal-input"
+              placeholder="Apellidos"
+              required
+            />
+            <input
+              v-model="formReg.email"
+              type="email"
+              class="modal-input"
+              placeholder="Correo"
+              required
+            />
+            <input
+              v-model="formReg.documento"
+              type="text"
+              class="modal-input"
+              placeholder="Documento"
+              required
+            />
           </div>
           <button type="submit" class="modal-btn">Registrarse</button>
         </form>
         <p class="modal-link">
-          ¿Ya tienes cuenta? <a href="#" @click.prevent="abrirLogin">Iniciar sesión</a>
+          ¿Ya tienes cuenta?
+          <a href="#" @click.prevent="abrirLogin">Iniciar sesión</a>
         </p>
       </div>
     </div>
@@ -86,7 +172,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, reactive, nextTick } from "vue";
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  reactive,
+  nextTick,
+} from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter, useRoute } from "vue-router";
 import { pedidoPanel } from "../../stores/pedidoPanel";
@@ -102,7 +195,12 @@ const mostrarRegistro = ref(false);
 const userMenu = ref(null);
 
 const formLogin = reactive({ documento: "", password: "" });
-const formReg = reactive({ nombre: "", apellido: "", email: "", documento: "" });
+const formReg = reactive({
+  nombre: "",
+  apellido: "",
+  email: "",
+  documento: "",
+});
 
 const toggleMenu = () => (menuOpen.value = !menuOpen.value);
 
@@ -172,7 +270,9 @@ const handleClickOutside = (e) => {
 };
 
 onMounted(() => document.addEventListener("click", handleClickOutside));
-onBeforeUnmount(() => document.removeEventListener("click", handleClickOutside));
+onBeforeUnmount(() =>
+  document.removeEventListener("click", handleClickOutside),
+);
 </script>
 <style scoped>
 /* ── Navbar ── */
