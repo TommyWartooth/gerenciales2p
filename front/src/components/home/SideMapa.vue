@@ -28,6 +28,24 @@
               <p>(+591) 63249751</p>
             </div>
           </div>
+          
+          <div class="mapa__dato">
+            <div>
+              <strong>Redes Sociales</strong>
+              <div class="mapa__social-links">
+                <a href="https://wa.me/59163249751" target="_blank" rel="noopener noreferrer" title="Escríbenos por WhatsApp">
+                  <i class="fa-brands fa-whatsapp"></i>
+                </a>
+                <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer" title="Síguenos en Instagram">
+                  <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a href="https://facebook.com/" target="_blank" rel="noopener noreferrer" title="Síguenos en Facebook">
+                  <i class="fa-brands fa-facebook-f"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -130,6 +148,26 @@
   color: var(--muted);
   margin: 0;
   line-height: 1.4;
+}
+
+/* Nuevos estilos para los íconos de redes sociales */
+.mapa__social-links {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.mapa__social-links a {
+  color: var(--muted);
+  font-size: 1.4rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+  text-decoration: none;
+}
+
+.mapa__social-links a:hover {
+  color: var(--gold); /* Cambiará al color dorado de tu diseño al pasar el ratón */
+  transform: translateY(-3px);
 }
 
 .mapa__iframe-wrap {

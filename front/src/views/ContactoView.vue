@@ -1,61 +1,94 @@
 <template>
-  <div class="contacto">
-    <h1>Contacto</h1>
+  <section class="contact-section">
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
 
-    <form @submit.prevent="enviarFormulario">
-      <div>
-        <label>Nombre:</label>
-        <input v-model="nombre" type="text" required />
+    <!--animación por scroll -->
+    <h1 class="contact-title obs-anim">Contáctanos</h1>
+
+    <div class="hero-contact obs-anim">
+      <div class="contact-card">
+        <div class="contact-item">
+          <span class="contact-icon">
+            <i class="fa-solid fa-phone"></i>
+          </span>
+          <div class="contact-text">
+            <span class="contact-label">Teléfono</span>
+            <span class="contact-value">      (+591) 63249751</span>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <span class="contact-icon">
+            <i class="fa-solid fa-envelope"></i>
+          </span>
+          <div class="contact-text">
+            <span class="contact-label">Correo electrónico</span>
+            <span class="contact-value">      taitita96@gmail.com</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORMULARIO -->
+    <form
+      class="contact-form obs-anim"
+      @submit.prevent="enviarFormulario"
+    >
+      <div class="campo">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" v-model="nombre" type="text" placeholder= "Ingresa tu nombre" required />
       </div>
 
-      <div>
-        <label>Email:</label>
-        <input v-model="email" type="email" required />
+      <div class="campo">
+        <label for="correo">Correo</label>
+        <input id="correo" v-model="correo" type="email" placeholder= "Ingresa tu correo electrónico" required />
       </div>
 
-      <div>
-        <label>Mensaje:</label>
-        <textarea v-model="mensaje" required></textarea>
+      <div class="campo">
+        <label for="mensaje">Mensaje</label>
+        <textarea id="mensaje" v-model="mensaje" rows="4" placeholder= "¿En qué podemos ayudarte?" required></textarea>
       </div>
 
-      <button type="submit">Enviar</button>
+      <button type="submit" class="btn-enviar">Enviar mensaje</button>
     </form>
-  </div>
+  </section>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from "vue"; 
 
-const nombre = ref('')
-const email = ref('')
-const mensaje = ref('')
+const nombre = ref("");
+const correo = ref("");
+const mensaje = ref("");
 
 const enviarFormulario = () => {
-  alert(`Gracias ${nombre.value}, tu mensaje fue enviado.`)
+  console.log("Nombre:", nombre.value);
+  console.log("Correo:", correo.value);
+  console.log("Mensaje:", mensaje.value);
 
-  nombre.value = ''
-  email.value = ''
-  mensaje.value = ''
-}
+  alert(`¡Gracias por contactarnos, ${nombre.value}!`);
+
+  nombre.value = "";
+  correo.value = "";
+  mensaje.value = "";
+};
+
+onMounted(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+        }
+      });
+    },
+    { threshold: 0.4 }
+  );
+
+  document.querySelectorAll(".obs-anim").forEach((el) => observer.observe(el));
+});
 </script>
 
-<style scoped>
-.contacto {
-  max-width: 500px;
-  margin: auto;
-  padding: 20px;
-}
-
-div {
-  margin-bottom: 15px;
-}
-
-input, textarea {
-  width: 100%;
-  padding: 8px;
-}
-
-button {
-  padding: 10px 20px;
-}
-</style>
+<style src="../components/contacto/contacto.css"></style>

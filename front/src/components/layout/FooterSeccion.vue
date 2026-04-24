@@ -21,10 +21,10 @@
       <div class="footer__col">
         <h4>Navegación</h4>
         <ul>
-          <li><a href="#inicio">Inicio</a></li>
-          <li><a href="#carta">Carta</a></li>
+          <li><router-link to="/">Inicio</router-link></li>
+          <li><router-link to="/carta">Carta</router-link></li>
           <li><router-link to="/nosotros">Sobre Nosotros</router-link></li>
-          <li><a href="#contacto">Contacto</a></li>
+          <li><router-link to="/contacto">Contacto</router-link></li>
         </ul>
       </div>
 
