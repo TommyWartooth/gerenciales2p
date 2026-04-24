@@ -23,7 +23,7 @@
         <ul>
           <li><a href="#inicio">Inicio</a></li>
           <li><a href="#carta">Carta</a></li>
-          <li><a href="#nosotros">Sobre Nosotros</a></li>
+          <li><router-link to="/nosotros">Sobre Nosotros</router-link></li>
           <li><a href="#contacto">Contacto</a></li>
         </ul>
       </div>
