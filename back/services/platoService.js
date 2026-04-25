@@ -4,7 +4,7 @@ import { Plato } from "../domain/Plato.js";
 export class PlatosService {
   async getAll() {
     const { rows } = await pool.query(
-      "SELECT * FROM plato ORDER BY idplato DESC "
+      "SELECT * FROM plato ORDER BY idplato DESC ",
     );
     return rows.map((row) => Plato.fromDbRow(row));
   }
@@ -12,7 +12,7 @@ export class PlatosService {
   async getById(id) {
     const { rows } = await pool.query(
       "SELECT * FROM plato WHERE idplato = $1",
-      [id]
+      [id],
     );
 
     if (rows.length === 0) return null;
@@ -67,7 +67,7 @@ export class PlatosService {
   async delete(id) {
     const { rowCount } = await pool.query(
       "DELETE FROM plato where idplato = $1",
-      [id]
+      [id],
     );
 
     return rowCount;

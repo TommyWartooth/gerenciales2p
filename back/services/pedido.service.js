@@ -35,7 +35,7 @@ export class PedidoService {
       JOIN modalidad m ON m.idmodalidad = p.idmodalidad
       WHERE p.idestadop IN (1, 2, 3)
       ORDER BY p.fecha_hora_pedido DESC, p.nropedido, pl.nombre;
-      `
+      `,
     );
 
     const mapa = new Map();
@@ -85,7 +85,7 @@ export class PedidoService {
     try {
       const { rows: pedidosRows } = await client.query(
         "SELECT * FROM pedido WHERE nropedido = $1",
-        [nropedido]
+        [nropedido],
       );
       if (pedidosRows.length === 0) return null;
 
@@ -96,7 +96,7 @@ export class PedidoService {
         JOIN plato p ON p.idplato = pp.idplato
         WHERE pp.nropedido = $1
         `,
-        [nropedido]
+        [nropedido],
       );
 
       const platos = platosRows.map((r) => ({
@@ -143,7 +143,7 @@ export class PedidoService {
 
       const { rows: pedidoRows } = await client.query(
         insertPedidoQuery,
-        pedidoValues
+        pedidoValues,
       );
 
       const nropedido = pedidoRows[0].nropedido;
@@ -203,7 +203,7 @@ export class PedidoService {
 
       const { rows: cabeceraRows } = await client.query(
         updateCabeceraQuery,
-        cabeceraValues
+        cabeceraValues,
       );
 
       if (cabeceraRows.length === 0) {
@@ -251,7 +251,7 @@ export class PedidoService {
 
       const { rowCount } = await client.query(
         "DELETE FROM pedido WHERE nropedido = $1",
-        [nropedido]
+        [nropedido],
       );
 
       await client.query("COMMIT");
@@ -282,7 +282,7 @@ export class PedidoService {
         p.idestadop,
         ep.nombre AS estado;
       `,
-        [nropedido, idestadop]
+        [nropedido, idestadop],
       );
 
       if (pedidoRows.length === 0) {
@@ -300,7 +300,7 @@ export class PedidoService {
       JOIN usuario_cliente uc ON uc.documento = u.documento
       WHERE u.documento = $1
       `,
-        [pedidoRow.documento]
+        [pedidoRow.documento],
       );
 
       let correoCliente = null;
@@ -357,7 +357,7 @@ export class PedidoService {
       p.nropedido, u.nombre, uc.nit, uc.razon_social,
       m.nombre, ep.nombre, fecha, hora, p.comentarios
     ORDER BY p.fecha_hora_pedido DESC;
-    `
+    `,
     );
 
     return rows;

@@ -1,5 +1,4 @@
 import { PedidoService } from "../services/pedido.service.js";
-//import { enviarCorreoEstadoPedido } from "../services/emailService.js";
 
 const pedidoService = new PedidoService();
 
@@ -56,7 +55,7 @@ export const actualizarPedidoCompleto = async (req, res, next) => {
 
     const pedidoActualizado = await pedidoService.updateCompleto(
       nropedido,
-      data
+      data,
     );
 
     if (!pedidoActualizado) {
@@ -106,7 +105,7 @@ export const actualizarEstadoPedido = async (req, res, next) => {
 
     const resultado = await pedidoService.actualizarEstado(
       nropedido,
-      idestadop
+      idestadop,
     );
 
     if (!resultado) {
@@ -117,21 +116,7 @@ export const actualizarEstadoPedido = async (req, res, next) => {
     const textoEstado =
       estadoTexto || resultado.estado || `Estado #${resultado.idestadop}`;
 
-    // Enviar correo (si hay correo de cliente)
-    try {
-      if (resultado.correoCliente) {
-        await enviarCorreoEstadoPedido({
-          correoCliente: resultado.correoCliente,
-          estadoTexto: textoEstado,
-          idPedido: resultado.nropedido,
-          nombreCliente: resultado.nombreCliente,
-        });
-      }
-    } catch (errCorreo) {
-      console.error("Error enviando correo de estado:", errCorreo);
-      // No rompemos la respuesta por fallo de correo
-    }
-
+    // Enviar correo de estado no está habilitado en este entorno.
     return res.json({
       message: "Estado actualizado correctamente",
       nropedido: resultado.nropedido,

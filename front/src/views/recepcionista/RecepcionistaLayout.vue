@@ -75,39 +75,6 @@
             <span class="recep-menu-text">Pedidos finalizados</span>
           </RouterLink>
 
-          <RouterLink
-            to="/recepcionista/reservas"
-            class="recep-menu-item"
-            active-class="recep-menu-item--active"
-          >
-            <span class="recep-menu-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M19 4h-1V2h-2v2H8V2H6v2H5a2.006 2.006 0 0 0-2 
-             2v12a2.006 2.006 0 0 0 2 2h14a2.006 2.006 0 0 0 
-             2-2V6a2.006 2.006 0 0 0-2-2zm0 14H5V10h14zm0-10H5V6h14z"
-                />
-              </svg>
-            </span>
-            <span class="recep-menu-text">Reservas de clientes</span>
-          </RouterLink>
-
-          <RouterLink
-            to="/recepcionista/mesas"
-            class="recep-menu-item"
-            active-class="recep-menu-item--active"
-          >
-            <span class="recep-menu-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M4 10h16v2H4zm0 4h10v2H4zM4 6h16v2H4z"
-                />
-              </svg>
-            </span>
-            <span class="recep-menu-text">Control de mesas</span>
-          </RouterLink>
           <button
             type="button"
             class="recep-menu-item"

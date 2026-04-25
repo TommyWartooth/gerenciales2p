@@ -45,6 +45,13 @@
               + Mostrar más detalles
             </button>
 
+            <button class="btn-aceptar" @click="aceptarPedido(pedido)">
+              Aceptar
+            </button>
+            <button class="btn-rechazar" @click="rechazarPedido(pedido)">
+              Rechazar
+            </button>
+
             <select
               v-model.number="pedido.estadoPropuestoId"
               class="select-estado"
@@ -186,6 +193,17 @@ async function cargarPedidos() {
 function verDetalles(pedido) {
   pedidoSeleccionado.value = pedido;
 }
+
+async function aceptarPedido(pedido) {
+  pedido.estadoPropuestoId = 2;
+  await confirmarEstado(pedido);
+}
+
+async function rechazarPedido(pedido) {
+  pedido.estadoPropuestoId = 5;
+  await confirmarEstado(pedido);
+}
+
 async function confirmarEstado(pedido) {
   const nuevoEstado = pedido.estadoPropuestoId;
 
@@ -369,7 +387,9 @@ onMounted(() => cargarPedidos());
   cursor: pointer;
   font-size: 0.8rem;
   font-weight: 600;
-  transition: filter 0.15s ease, transform 0.1s ease;
+  transition:
+    filter 0.15s ease,
+    transform 0.1s ease;
 }
 
 .btn-detalles {
@@ -512,7 +532,9 @@ onMounted(() => cargarPedidos());
   font-weight: 700;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: filter 0.15s ease, transform 0.1s ease;
+  transition:
+    filter 0.15s ease,
+    transform 0.1s ease;
 }
 
 .btn-guardar:hover {

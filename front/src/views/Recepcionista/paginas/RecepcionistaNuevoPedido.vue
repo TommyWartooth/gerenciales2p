@@ -156,11 +156,11 @@
 <script setup>
 import { ref, computed } from "vue";
 
-import BebidasSection from "@/components/pedidos/sectionsPedido/BebidasSection.vue";
-import PlatosSection from "@/components/pedidos/sectionsPedido/PlatosSection.vue";
-import EntradasSection from "@/components/pedidos/sectionsPedido/EntradasSection.vue";
-import PostresSection from "@/components/pedidos/sectionsPedido/PostresSection.vue";
-import RecepcionistaDatosCliente from "@/components/pedidos/sectionsPedido/RecepcionistaDatosCliente.vue";
+import BebidasSection from "@/components/pedidos/SeccionesPedido/SeccionBebidas.vue";
+import PlatosSection from "@/components/pedidos/SeccionesPedido/SeccionPlatos.vue";
+import EntradasSection from "@/components/pedidos/SeccionesPedido/SeccionEntradas.vue";
+import PostresSection from "@/components/pedidos/SeccionesPedido/SeccionPostres.vue";
+import RecepcionistaDatosCliente from "@/components/pedidos/SeccionesPedido/DatosEntregaSeccion.vue";
 
 /* Estado local solo para recepcionista */
 const pasoActual = ref("pedido"); // 'pedido' | 'datos'
@@ -172,7 +172,7 @@ const ultimoPedidoEnviado = ref(null);
 const cargando = ref(false);
 
 const totalCarrito = computed(() =>
-  carrito.value.reduce((acc, item) => acc + (item.subtotal || 0), 0)
+  carrito.value.reduce((acc, item) => acc + (item.subtotal || 0), 0),
 );
 
 function seleccionarDesdeSeccion(item) {
@@ -230,7 +230,7 @@ async function manejarGuardarDatos(datosClienteYEntrega) {
 
   console.log(
     "🧾 datosClienteYEntrega:",
-    JSON.stringify(datosClienteYEntrega, null, 2)
+    JSON.stringify(datosClienteYEntrega, null, 2),
   );
 
   const pedido = datosClienteYEntrega.pedido || {};
@@ -262,7 +262,7 @@ async function manejarGuardarDatos(datosClienteYEntrega) {
   console.log("Payload a enviar a /api/ordenes:", payload);
 
   try {
-    const resp = await fetch("/api/ordenes", {
+    const resp = await fetch("/api/pedidos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -336,7 +336,10 @@ async function manejarGuardarDatos(datosClienteYEntrega) {
   padding: 0.3rem 0.9rem;
   border-radius: 999px;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .tab.active {
@@ -385,7 +388,9 @@ async function manejarGuardarDatos(datosClienteYEntrega) {
   padding: 0.2rem 0.8rem;
   border-radius: 999px;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .menu-tab-btn.active {
@@ -489,7 +494,9 @@ async function manejarGuardarDatos(datosClienteYEntrega) {
   cursor: pointer;
   background: #14514f; /* verde petróleo */
   color: #fdf7ec;
-  transition: transform 0.1s ease, filter 0.15s ease;
+  transition:
+    transform 0.1s ease,
+    filter 0.15s ease;
 }
 
 .btn-add:hover {
