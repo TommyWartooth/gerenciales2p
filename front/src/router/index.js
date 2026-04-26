@@ -6,6 +6,7 @@ import InicioView from "../views/InicioView.vue";
 import CartaView from "../views/CartaView.vue";
 import ContactoView from "../views/ContactoView.vue";
 import NosotrosView from "../views/NosotrosView.vue";
+import PerfilClienteView from "../views/PerfilClienteView.vue";
 
 const routes = [
   { path: "/", name: "inicio", component: InicioView },
@@ -23,6 +24,11 @@ const routes = [
     path: '/nosotros', 
     name: 'nosotros',
     component: NosotrosView 
+  },
+  {
+    path: '/perfil',
+    name: 'PerfilCliente',
+    component: PerfilClienteView
   },
   
   // PANEL DE ADMINISTRADOR

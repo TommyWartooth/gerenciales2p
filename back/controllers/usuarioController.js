@@ -19,6 +19,19 @@ export const registrarCliente = async (req, res) => {
         const resultado = await usuarioService.createCliente(req.body);
         res.status(201).json(resultado);
     } catch (error) {
+        console.error("🔥 ERROR EXACTO AL REGISTRAR:", error);
+        res.status(error.status || 500).json({ msg: error.message });
+    }
+};
+
+export const actualizarPerfilCliente = async (req, res) => {
+    try {
+        // Extraemos el documento de req.user (inyectado por el middleware checkRole)
+        const documento = req.user.documento; 
+        
+        const resultado = await usuarioService.updateCliente(documento, req.body);
+        res.json(resultado);
+    } catch (error) {
         res.status(error.status || 500).json({ msg: error.message });
     }
 };

@@ -1,4 +1,3 @@
-// src/stores/auth.js
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 
@@ -10,7 +9,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function login({ documento, contrasela }) {
     // ← contrasela
-    const resp = await fetch("http://localhost:3000/api/usuarios/login", {
+    const resp = await fetch("http://127.0.0.1:3000/api/usuarios/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ documento, contrasela }), // ← contrasela
@@ -42,5 +41,67 @@ export const useAuthStore = defineStore("auth", () => {
     localStorage.removeItem("token");
   }
 
-  return { usuario, rol, token, isAuthenticated, login, logout };
+  // ==========================================
+  // --- NUEVAS FUNCIONES PARA LAS HISTORIAS ---
+  // ==========================================
+
+  // Historia 1: Registrar Cliente
+  async function registrarCliente(datosRegistro) {
+    const resp = await fetch("http://127.0.0.1:3000/api/usuarios/registro-cliente", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(datosRegistro),
+    });
+
+    const data = await resp.json();
+    
+    // Si la respuesta no es 2xx, lanzamos el error para atraparlo en el componente
+    if (!resp.ok) {
+      throw new Error(data.msg || "Error en el registro");
+    }
+    
+    return data;
+  }
+
+  // Historia 2: Actualizar Perfil de Cliente
+  async function actualizarPerfil(datosActualizados) {
+    const resp = await fetch("http://127.0.0.1:3000/api/usuarios/perfil", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        // Aquí pasamos el token directamente de nuestra constante reactiva `token`
+        "Authorization": `Bearer ${token.value}` 
+      },
+      body: JSON.stringify(datosActualizados),
+    });
+
+    const data = await resp.json();
+    
+    if (!resp.ok) {
+      throw new Error(data.msg || "Error al actualizar perfil");
+    }
+
+    // Actualizamos el estado local (usuario.value) para que los cambios 
+    // se reflejen inmediatamente en toda la interfaz sin recargar la página.
+    usuario.value = { ...usuario.value, ...datosActualizados };
+    
+    // Guardamos los datos actualizados en localStorage
+    localStorage.setItem("usuario", JSON.stringify(usuario.value));
+
+    return data;
+  }
+
+  // Exportar todas las variables y funciones
+  return { 
+    usuario, 
+    rol, 
+    token, 
+    isAuthenticated, 
+    login, 
+    logout,
+    registrarCliente,
+    actualizarPerfil
+  };
 });

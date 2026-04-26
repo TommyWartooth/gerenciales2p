@@ -1,6 +1,43 @@
 import { pool } from "../db/pool.js";
 import { UsuarioCliente, UsuarioPersonal } from "../domain/Usuario.js";
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Función mágica que convierte Base64 a archivo físico
+function procesarImagen(base64String, documento) {
+  if (!base64String || !base64String.startsWith('data:image')) return base64String;
+
+  try {
+    const matches = base64String.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) return null;
+
+    const extension = matches[1].split('/')[1] === 'jpeg' ? 'jpg' : matches[1].split('/')[1];
+    const buffer = Buffer.from(matches[2], 'base64');
+    
+    // Nombre corto y único
+    const fileName = `foto_${documento}_${Date.now()}.${extension}`;
+    
+    // Ruta de la carpeta (back/public/uploads)
+    const uploadDir = path.join(__dirname, '../public/uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    // Guardamos el archivo físicamente
+    fs.writeFileSync(path.join(uploadDir, fileName), buffer);
+
+    // Retornamos solo el texto cortito para la BD
+    return `/uploads/${fileName}`; 
+  } catch (error) {
+    console.error("Error al guardar la imagen:", error);
+    return null;
+  }
+}
 
 const t_cliente = 1;
 const t_personal = 2;
@@ -25,9 +62,12 @@ export class UsuarioService {
     const salt = await bcrypt.genSalt(10);
     const passwordHasheada = await bcrypt.hash(data.contrasela, salt);
 
+    const rutaFotoCorta = procesarImagen(data.fotoperfil, data.documento);
+
     const cliente = new UsuarioCliente({
       ...data,
       contrasela: passwordHasheada,
+      fotoperfil: rutaFotoCorta, // <-- Ahora es un texto de 30 caracteres
       idtipo: t_cliente
     });
 
@@ -53,6 +93,44 @@ export class UsuarioService {
 
       await client.query("COMMIT");
       return { msg: "Cliente creado con éxito" };
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateCliente(documento, data) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      // 1. Buscar si el usuario existe
+      const { rows } = await client.query("SELECT * FROM usuario WHERE documento = $1", [documento]);
+      if (rows.length === 0) throw Object.assign(new Error("Cliente no encontrado"), { status: 404 });
+
+      const actual = rows[0];
+
+      // Si nos envían un base64 gigante, lo volvemos archivo
+      const rutaFotoCorta = procesarImagen(data.fotoperfil, documento) ?? actual.fotoperfil;
+
+      // 2. Actualizamos...
+      await client.query(
+        `UPDATE usuario SET nombre=$2, apellidos=$3, celular=$4, telefono_fijo=$5, fotoperfil=$6 
+         WHERE documento=$1`,
+        [
+          documento, 
+          data.nombre ?? actual.nombre, 
+          data.apellidos ?? actual.apellidos, 
+          data.celular ?? actual.celular, 
+          data.telefono_fijo ?? actual.telefono_fijo,
+          rutaFotoCorta // <-- Enviamos la ruta corta
+        ]
+      );
+
+      await client.query("COMMIT");
+      return { msg: "Perfil actualizado correctamente" };
     } catch (err) {
       await client.query("ROLLBACK");
       throw err;

@@ -5,6 +5,7 @@ import { login } from '../controllers/authController.js';
 import { 
     registrarCliente, 
     obtenerClientes,
+    actualizarPerfilCliente,
     registrarPersonal,
     obtenerTodoElPersonal,
     obtenerPersonalPorDoc,
@@ -24,6 +25,7 @@ router.post('/registro-cliente', registrarCliente);
 // --- RUTAS DE CLIENTES ---
 // ==========================================
 router.get('/clientes', checkRole(['administrador', 'recepcionista']), obtenerClientes);
+router.put('/perfil', checkRole(['cliente']), actualizarPerfilCliente);
 
 // ==========================================
 // --- RUTAS DE PERSONAL (SÓLO ADMIN) ---

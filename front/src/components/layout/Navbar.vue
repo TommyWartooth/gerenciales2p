@@ -61,6 +61,9 @@
                 >
                   Panel Control
                 </router-link>
+                <router-link to="/perfil" @click="mostrarUserMenu = false">
+                  Mi Perfil
+                </router-link>
                 <a href="#" @click.prevent="handleCerrarSesion"
                   >Cerrar sesión</a
                 >
@@ -131,36 +134,41 @@
         <h2 class="modal-titulo">Crear cuenta</h2>
         <form @submit.prevent="ejecutarRegistro" class="form-registro">
           <div class="form-grid">
-            <input
-              v-model="formReg.nombre"
-              type="text"
-              class="modal-input"
-              placeholder="Nombres"
-              required
-            />
-            <input
-              v-model="formReg.apellido"
-              type="text"
-              class="modal-input"
-              placeholder="Apellidos"
-              required
-            />
-            <input
-              v-model="formReg.email"
-              type="email"
-              class="modal-input"
-              placeholder="Correo"
-              required
-            />
-            <input
-              v-model="formReg.documento"
-              type="text"
-              class="modal-input"
-              placeholder="Documento"
-              required
-            />
+            <div class="form-columna">
+              <input v-model="formReg.nombre" type="text" class="modal-input" placeholder="Nombres" required />
+              <input v-model="formReg.apellidos" type="text" class="modal-input" placeholder="Apellidos" required />
+              <input v-model="formReg.correo" type="email" class="modal-input" placeholder="Correo electrónico" required />
+              
+              <div class="modal-input-fecha">
+                <label>Seleccione su fecha de nacimiento:</label>
+                <input v-model="formReg.fecha_nac" type="date" class="modal-input" required />
+              </div>
+
+              <input v-model="formReg.celular" type="text" class="modal-input" placeholder="Número de celular" required />
+              <input v-model="formReg.telefono_fijo" type="text" class="modal-input" placeholder="Número de teléfono fijo" />
+              <input v-model="formReg.documento" type="text" class="modal-input" placeholder="Ingrese su documento" required />
+              <input v-model="formReg.nit" type="text" class="modal-input" placeholder="NIT (opcional)" />
+              <input v-model="formReg.razon_social" type="text" class="modal-input" placeholder="Razón Social (opcional)" />
+              <input v-model="formReg.contrasela" type="password" class="modal-input" placeholder="Ingrese una contraseña" required />
+            </div>
+
+            <div class="foto-perfil-box">
+              <span class="foto-label">Foto de perfil</span>
+              <img :src="formReg.fotoperfil || '/placeholder-user.png'" alt="Perfil" class="foto-preview" />
+              
+              <label class="input-file-label">
+                Seleccionar archivo
+                <input type="file" @change="handleFotoUpload" accept="image/*" style="display: none;" />
+              </label>
+
+              <label class="checkbox-label" style="margin-top: auto;">
+                <input type="checkbox" required />
+                Acepto los <a href="#">Términos y condiciones</a>
+              </label>
+            </div>
           </div>
-          <button type="submit" class="modal-btn">Registrarse</button>
+          
+          <button type="submit" class="modal-btn">REGISTRAR</button>
         </form>
         <p class="modal-link">
           ¿Ya tienes cuenta?
@@ -197,10 +205,28 @@ const userMenu = ref(null);
 const formLogin = reactive({ documento: "", password: "" });
 const formReg = reactive({
   nombre: "",
-  apellido: "",
-  email: "",
+  apellidos: "", 
+  correo: "",  
+  fecha_nac: "",
+  celular: "",
+  telefono_fijo: "",
   documento: "",
+  nit: "",
+  razon_social: "",
+  contrasela: "",
+  fotoperfil: null
 });
+
+const handleFotoUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      formReg.fotoperfil = e.target.result; // Guardamos el Base64
+    };
+    reader.readAsDataURL(file);
+  }
+};
 
 const toggleMenu = () => (menuOpen.value = !menuOpen.value);
 
@@ -253,9 +279,19 @@ const handleCerrarSesion = () => {
   router.push("/");
 };
 
-const ejecutarRegistro = () => {
-  alert("Registro exitoso (Simulado)");
-  abrirLogin();
+const ejecutarRegistro = async () => {
+  try {
+    // Llamamos a la función que creaste en auth.js
+    await auth.registrarCliente({ ...formReg }); 
+    alert("¡Registro exitoso! Ya puedes iniciar sesión.");
+    
+    // Limpiamos el formulario
+    Object.keys(formReg).forEach(key => formReg[key] = "");
+    
+    abrirLogin(); // Redirige al login modal
+  } catch (err) {
+    alert(err.message || "Error al registrarse");
+  }
 };
 
 const toggleUserMenu = (e) => {
