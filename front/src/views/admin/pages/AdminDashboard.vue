@@ -1,7 +1,16 @@
 <template>
   <div class="dashboard">
 
-    <!-- Cards KPI -->
+    <div class="dashboard__header">
+      <button 
+        @click="generarPDF" 
+        :disabled="cargando"
+        class="btn-download"
+      >
+        <span class="icon">📥</span> Descargar Reporte PDF
+      </button>
+    </div>
+
     <div class="dashboard__cards">
       <div class="dash-card" v-for="card in cards" :key="card.label">
         <span class="dash-card__icon">{{ card.icon }}</span>
@@ -12,13 +21,11 @@
       </div>
     </div>
 
-    <!-- Error -->
     <div v-if="error" class="dash-error">
       ⚠️ {{ error }}
     </div>
 
     <div class="dashboard__bottom">
-      <!-- Pedidos recientes -->
       <div class="dash-section">
         <h3 class="dash-section__title">Pedidos recientes</h3>
         <p v-if="cargando" class="dash-cargando">Cargando...</p>
@@ -51,7 +58,6 @@
         </table>
       </div>
 
-      <!-- Platos más pedidos -->
       <div class="dash-section">
         <h3 class="dash-section__title">Platos en carta</h3>
         <p v-if="cargando" class="dash-cargando">Cargando...</p>
@@ -73,7 +79,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 const emit = defineEmits(['set-titulo'])
 
 const cargando  = ref(true)
@@ -148,10 +155,104 @@ const pedidosRecientes = computed(() =>
 const platosTop = computed(() =>
   platos.value.filter(p => p.disponibilidad !== false).slice(0, 5)
 )
+const generarPDF = () => {
+  const doc = new jsPDF()
+  const fecha = new Date().toLocaleDateString()
+  const hora = new Date().toLocaleTimeString()
+
+  // Título
+  doc.setFontSize(18)
+  doc.setTextColor(20, 20, 20)
+  doc.text('Reporte General del Sistema - Restaurant', 14, 20)
+  
+  // Subtítulo / Fecha
+  doc.setFontSize(10)
+  doc.setTextColor(100, 100, 100)
+  doc.text(`Generado el: ${fecha} a las ${hora}`, 14, 28)
+  doc.line(14, 32, 196, 32) // Línea divisoria
+
+  // Sección 1: Resumen de KPIs
+  doc.setFontSize(14)
+  doc.setTextColor(40, 40, 40)
+  doc.text('Resumen de Gestión', 14, 45)
+  
+  const resumenData = cards.value.map(c => [c.label, c.value])
+  
+  // PRIMER CAMBIO AQUÍ
+  autoTable(doc, {
+    startY: 50,
+    head: [['Indicador', 'Valor']],
+    body: resumenData,
+    theme: 'striped',
+    headStyles: { fillColor: [68, 2, 14] }, 
+    styles: { fontSize: 10 }
+  })
+
+  // Sección 2: Pedidos
+  const finalY = doc.lastAutoTable.finalY
+  
+  doc.setFontSize(14)
+  doc.text('Últimos Pedidos', 14, finalY + 15)
+
+  const tablaPedidos = pedidosRecientes.value.map(p => [
+    p.nropedido ?? p.id,
+    p.nombre_cliente ?? p.cliente ?? '—',
+    p.modalidad ?? '—',
+    `Bs. ${Number(p.total ?? 0).toFixed(2)}`,
+    p.estado ?? '—'
+  ])
+
+  // SEGUNDO CAMBIO AQUÍ
+  autoTable(doc, {
+    startY: finalY + 20,
+    head: [['#', 'Cliente', 'Tipo', 'Total', 'Estado']],
+    body: tablaPedidos,
+    headStyles: { fillColor: [180, 120, 0] },
+    styles: { fontSize: 10 }
+  })
+
+  // Descargar el archivo
+  doc.save(`Reporte_Dashboard_${fecha.replace(/\//g, '-')}.pdf`)
+}
 </script>
 
 <style scoped>
 .dashboard { display: flex; flex-direction: column; gap: 2rem; }
+
+/* -- Estilos del botón de PDF -- */
+.dashboard__header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-download {
+  background: var(--wine, #44020e);
+  color: var(--gold, #e8c96a);
+  border: 1px solid rgba(235, 205, 149, 0.3);
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-download:hover {
+  background: rgba(68, 2, 14, 0.8);
+  border-color: var(--gold);
+}
+
+.btn-download:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: #888;
+  border-color: transparent;
+  cursor: not-allowed;
+}
+/* ------------------------------ */
 
 .dashboard__cards {
   display: grid;
