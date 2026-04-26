@@ -35,7 +35,14 @@
             </td>
             <td class="acciones">
               <button class="btn-edit" @click="abrirEditar(p)">✏️ Editar</button>
-              <button class="btn-delete" @click="eliminar(p)">🗑 Eliminar</button>
+              <button 
+                class="btn-delete" 
+                @click="eliminar(p)" 
+                :disabled="!p.puede_borrarse"
+                :title="!p.puede_borrarse ? 'No se puede eliminar: el plato tiene pedidos registrados' : 'Eliminar'"
+              >
+                🗑 Eliminar
+              </button>
             </td>
           </tr>
           <tr v-if="!platosFiltrados.length">
@@ -214,6 +221,8 @@ async function cargarPlatos() {
       disponibilidad: p.disponibilidad,
       idcategoria: p.idcategoria,
       imagen: p.imagen,
+      
+      puede_borrarse: p.puede_borrarse 
     }))
   } catch (err) {
     console.error("Error fatal:", err)
@@ -368,5 +377,20 @@ const onFotoEditar = (e) => {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.btn-delete:disabled {
+  background-color: #d1d5db !important; 
+  color: #9ca3af !important;           
+  cursor: not-allowed;                
+  border-color: #e5e7eb !important;
+  box-shadow: none !important;         
+  transform: none !important;         
+  opacity: 0.7;
+}
+
+.btn-delete:disabled:hover {
+  background-color: #d1d5db !important;
+  filter: none !important;
 }
 </style>

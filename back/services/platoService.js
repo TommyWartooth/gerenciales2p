@@ -24,7 +24,8 @@ export class PlatosService {
     const query = `
     SELECT *
     FROM plato
-    WHERE idcategoria = $1
+    WHERE idcategoria = $1 
+      AND disponibilidad = true  -- <--- FILTRO AGREGADO
     ORDER BY nombre;
   `;
 
@@ -104,4 +105,25 @@ export class PlatosService {
 
     return Plato.fromDbRow(rows[0]);
   }
+
+  
+
+async getAll() {
+  const query = `
+    SELECT 
+      p.*, 
+      (SELECT COUNT(*) FROM pedido_plato pp WHERE pp.idplato = p.idplato) = 0 AS puede_borrarse
+    FROM plato p
+    ORDER BY p.idplato DESC;
+  `;
+
+  const { rows } = await pool.query(query);
+
+  return rows.map((row) => {
+    const plato = Plato.fromDbRow(row);
+    // Inyectamos la propiedad directamente al objeto mapeado
+    plato.puede_borrarse = row.puede_borrarse;
+    return plato;
+  });
+}
 }

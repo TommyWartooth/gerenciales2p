@@ -7,6 +7,7 @@
     disponibilidad,
     imagen,
     idcategoria,
+    puede_borrarse
   }) {
     this.id = id;
     this.nombre = nombre;
@@ -15,6 +16,8 @@
     this.disponibilidad = disponibilidad;
     this.imagen = imagen;
     this.idcategoria = idcategoria;
+
+    this.puede_borrarse = puede_borrarse;
   }
 
   validar() {
@@ -33,6 +36,7 @@
       disponibilidad: row.disponibilidad,
       imagen: row.imagen,
       idcategoria: row.idcategoria,
+      puede_borrarse: row.puede_borrarse
     });
   }
 }
