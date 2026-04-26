@@ -7,36 +7,38 @@ export class PedidoService {
     const { rows } = await pool.query(
       `
       SELECT
-        p.nropedido,
-        p.comentarios,
-        p.fecha_hora_pedido,
-        p.idmodalidad,
-        m.nombre AS modalidad,
-        p.idestadop,
-        ep.nombre AS estado,
-        p.direccion,
-        p.documento,
-
-        u.nombre AS cliente,
-        u.correo AS correo_cliente,
-        uc.nit,
-        uc.razon_social,
-
-        pp.idplato,
-        pl.nombre AS nombre_plato,
-        pp.cantidad,
-        pl.costo_unitario
-      FROM pedido p
-      JOIN pedido_plato pp ON pp.nropedido = p.nropedido
-      JOIN plato pl ON pl.idplato = pp.idplato
-      JOIN usuario u ON u.documento = p.documento
-      LEFT JOIN usuario_cliente uc ON uc.documento = u.documento
-      JOIN estadop ep ON ep.idestadop = p.idestadop
-      JOIN modalidad m ON m.idmodalidad = p.idmodalidad
-      WHERE p.idestadop IN (1, 2, 3)
-      ORDER BY p.fecha_hora_pedido DESC, p.nropedido, pl.nombre;
-      `,
-    );
+      p.nropedido,
+      p.comentarios,
+      p.fecha_hora_pedido,
+      p.idmodalidad,
+      m.nombre AS modalidad,
+      p.idestadop,
+      ep.nombre AS estado,
+      p.direccion,
+      p.documento,
+      u.nombre AS cliente,
+      u.correo AS correo_cliente,
+      uc.nit,
+      uc.razon_social,
+      pp.idplato,
+      pl.nombre AS nombre_plato,
+      pp.cantidad,
+      ph.costo_unitario -- <--- CAMBIADO: ph en lugar de pl
+    FROM pedido p
+    JOIN pedido_plato pp ON pp.nropedido = p.nropedido
+    JOIN plato pl ON pl.idplato = pp.idplato
+    -- UNIMOS CON EL HISTORIAL POR RANGO DE FECHA
+    JOIN precio_historial ph ON ph.idplato = pl.idplato 
+      AND p.fecha_hora_pedido >= ph.fecha_desde 
+      AND (ph.fecha_hasta IS NULL OR p.fecha_hora_pedido < ph.fecha_hasta)
+    JOIN usuario u ON u.documento = p.documento
+    LEFT JOIN usuario_cliente uc ON uc.documento = u.documento
+    JOIN estadop ep ON ep.idestadop = p.idestadop
+    JOIN modalidad m ON m.idmodalidad = p.idmodalidad
+    WHERE p.idestadop IN (1, 2, 3)
+    ORDER BY p.fecha_hora_pedido DESC, p.nropedido, pl.nombre;
+    `,
+  );
 
     const mapa = new Map();
 
@@ -91,10 +93,18 @@ export class PedidoService {
 
       const { rows: platosRows } = await client.query(
         `
-        SELECT pp.idplato, pp.cantidad, p.nombre, p.costo_unitario
-        FROM pedido_plato pp
-        JOIN plato p ON p.idplato = pp.idplato
-        WHERE pp.nropedido = $1
+            SELECT 
+            pp.idplato, 
+            pp.cantidad, 
+            pl.nombre, 
+            ph.costo_unitario -- <--- CAMBIADO
+          FROM pedido_plato pp
+          JOIN plato pl ON pl.idplato = pp.idplato
+          JOIN pedido p ON p.nropedido = pp.nropedido
+          JOIN precio_historial ph ON ph.idplato = pl.idplato
+            AND p.fecha_hora_pedido >= ph.fecha_desde 
+            AND (ph.fecha_hasta IS NULL OR p.fecha_hora_pedido < ph.fecha_hasta)
+          WHERE pp.nropedido = $1
         `,
         [nropedido],
       );
@@ -331,36 +341,39 @@ export class PedidoService {
     }
   }
 async getHistorial() {
-    const { rows } = await pool.query(
-      `
+  const { rows } = await pool.query(
+    `
     SELECT
-      p.nropedido                  AS id,
+      p.nropedido AS id,
       COALESCE(u.nombre, 'Sin registrar') AS cliente,
       uc.nit,
       uc.razon_social,
-      m.nombre                     AS modalidad,
-      ep.nombre                    AS estado,
+      m.nombre AS modalidad,
+      ep.nombre AS estado,
       TO_CHAR(p.fecha_hora_pedido, 'YYYY-MM-DD') AS fecha,
-      TO_CHAR(p.fecha_hora_pedido, 'HH24:MI')    AS hora,
-      COALESCE(SUM(pp.cantidad * pl.costo_unitario), 0) AS total,
+      TO_CHAR(p.fecha_hora_pedido, 'HH24:MI') AS hora,
+      -- CAMBIADO: ph.costo_unitario
+      COALESCE(SUM(pp.cantidad * ph.costo_unitario), 0) AS total,
       p.comentarios
     FROM pedido p
-    LEFT JOIN usuario u              ON u.documento = p.documento
-    LEFT JOIN usuario_cliente uc     ON uc.documento = p.documento
-    LEFT JOIN modalidad m            ON m.idmodalidad = p.idmodalidad
-    LEFT JOIN estadop ep             ON ep.idestadop = p.idestadop
-    LEFT JOIN pedido_plato pp        ON pp.nropedido = p.nropedido
-    LEFT JOIN plato pl               ON pl.idplato = pp.idplato
-    -- Aquí la magia: Buscamos por la palabra, no por el ID, así no falla
+    LEFT JOIN usuario u ON u.documento = p.documento
+    LEFT JOIN usuario_cliente uc ON uc.documento = p.documento
+    LEFT JOIN modalidad m ON m.idmodalidad = p.idmodalidad
+    LEFT JOIN estadop ep ON ep.idestadop = p.idestadop
+    LEFT JOIN pedido_plato pp ON pp.nropedido = p.nropedido
+    LEFT JOIN plato pl ON pl.idplato = pp.idplato
+    -- MAGIC JOIN
+    LEFT JOIN precio_historial ph ON ph.idplato = pl.idplato
+      AND p.fecha_hora_pedido >= ph.fecha_desde 
+      AND (ph.fecha_hasta IS NULL OR p.fecha_hora_pedido < ph.fecha_hasta)
     WHERE ep.nombre ILIKE 'entregado' OR ep.nombre ILIKE 'cancelado' 
        OR p.idestadop IN (4, 5)
     GROUP BY 
       p.nropedido, u.nombre, uc.nit, uc.razon_social,
-      m.nombre, ep.nombre, fecha, hora, p.comentarios
+      m.nombre, ep.nombre, p.fecha_hora_pedido, p.comentarios
     ORDER BY p.fecha_hora_pedido DESC;
     `
-    );
-
-    return rows;
-  }
+  );
+  return rows;
+}
 }
