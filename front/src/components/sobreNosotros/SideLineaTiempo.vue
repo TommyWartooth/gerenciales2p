@@ -46,7 +46,7 @@
           <h3>2017 - Expansión nacional</h3>
           <p>
             Participamos en ferias gastronómicas nacionales mostrando la cocina
-            peruana.
+            boliviana.
           </p>
         </div>
       </li>
@@ -57,7 +57,7 @@
           <h3>2022 - Reconocimiento Gourmet</h3>
           <p>
             Somos catalogados como uno de los mejores restaurantes de comida
-            peruana en la ciudad.
+            boliviana en la ciudad.
           </p>
         </div>
       </li>

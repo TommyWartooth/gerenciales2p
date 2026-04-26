@@ -1,20 +1,28 @@
 <template>
   <div class="dashboard">
 
+    <!-- Cards KPI -->
     <div class="dashboard__cards">
       <div class="dash-card" v-for="card in cards" :key="card.label">
         <span class="dash-card__icon">{{ card.icon }}</span>
         <div>
-          <p class="dash-card__value">{{ card.value }}</p>
+          <p class="dash-card__value">{{ cargando ? '...' : card.value }}</p>
           <p class="dash-card__label">{{ card.label }}</p>
         </div>
       </div>
     </div>
 
+    <!-- Error -->
+    <div v-if="error" class="dash-error">
+      ⚠️ {{ error }}
+    </div>
+
     <div class="dashboard__bottom">
+      <!-- Pedidos recientes -->
       <div class="dash-section">
         <h3 class="dash-section__title">Pedidos recientes</h3>
-        <table class="dash-table">
+        <p v-if="cargando" class="dash-cargando">Cargando...</p>
+        <table v-else class="dash-table">
           <thead>
             <tr>
               <th>#</th>
@@ -25,25 +33,37 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="p in pedidosRecientes" :key="p.id">
-              <td>{{ p.id }}</td>
-              <td>{{ p.cliente }}</td>
-              <td>{{ p.tipo }}</td>
-              <td>Bs. {{ p.total }}</td>
-              <td><span class="badge" :class="p.estado">{{ p.estado }}</span></td>
+            <tr v-for="p in pedidosRecientes" :key="p.nropedido ?? p.id">
+              <td>{{ p.nropedido ?? p.id }}</td>
+              <td>{{ p.nombre_cliente ?? p.cliente ?? '—' }}</td>
+              <td>{{ p.modalidad ?? '—' }}</td>
+              <td>Bs. {{ Number(p.total ?? 0).toFixed(2) }}</td>
+              <td>
+                <span class="badge" :class="(p.estado ?? '').toLowerCase()">
+                  {{ p.estado ?? '—' }}
+                </span>
+              </td>
+            </tr>
+            <tr v-if="!pedidosRecientes.length">
+              <td colspan="5" class="dash-vacia">No hay pedidos registrados.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
+      <!-- Platos más pedidos -->
       <div class="dash-section">
-        <h3 class="dash-section__title">Platos más pedidos</h3>
-        <ul class="dash-list">
+        <h3 class="dash-section__title">Platos en carta</h3>
+        <p v-if="cargando" class="dash-cargando">Cargando...</p>
+        <ul v-else class="dash-list">
           <li v-for="(plato, i) in platosTop" :key="i" class="dash-list__item">
             <span class="dash-list__rank">{{ i + 1 }}</span>
             <span class="dash-list__name">{{ plato.nombre }}</span>
-            <span class="dash-list__count">{{ plato.pedidos }} pedidos</span>
+            <span class="dash-list__count">
+              Bs. {{ Number(plato.costo_unitario ?? 0).toFixed(2) }}
+            </span>
           </li>
+          <li v-if="!platosTop.length" class="dash-vacia">Sin platos.</li>
         </ul>
       </div>
     </div>
@@ -52,32 +72,82 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const emit = defineEmits(['set-titulo'])
-onMounted(() => emit('set-titulo', 'Dashboard'))
 
-const cards = [
-  { icon: '📋', value: '24',    label: 'Pedidos hoy' },
-  { icon: '👥', value: '138',   label: 'Clientes registrados' },
-  { icon: '🍽️', value: '32',   label: 'Platos en carta' },
-  { icon: '💰', value: 'Bs. 3,840', label: 'Ingresos del día' },
-]
+const cargando  = ref(true)
+const error     = ref(null)
 
-const pedidosRecientes = [
-  { id: 1, cliente: 'Ana Mamani',    tipo: 'Local',     total: '85.00',  estado: 'confirmado' },
-  { id: 2, cliente: 'Carlos Quispe', tipo: 'Domicilio', total: '120.50', estado: 'pendiente' },
-  { id: 3, cliente: 'Lucía Flores',  tipo: 'Local',     total: '65.00',  estado: 'confirmado' },
-  { id: 4, cliente: 'Mario Condori', tipo: 'Domicilio', total: '200.00', estado: 'entregado' },
-]
+const pedidos  = ref([])
+const platos   = ref([])
+const clientes = ref([])
 
-const platosTop = [
-  { nombre: 'Pique Macho',       pedidos: 48 },
-  { nombre: 'Sajta de Pollo',    pedidos: 35 },
-  { nombre: 'Silpancho',         pedidos: 29 },
-  { nombre: 'Fricasé Real',      pedidos: 22 },
-  { nombre: 'Majadito de Charque', pedidos: 18 },
-]
+const token = localStorage.getItem('token')
+const headers = {
+  'Content-Type': 'application/json',
+  ...(token ? { Authorization: `Bearer ${token}` } : {})
+}
+
+async function cargarDatos() {
+  cargando.value = true
+  error.value    = null
+  try {
+    const [resPedidos, resPlatos, resClientes] = await Promise.all([
+      fetch('http://localhost:3000/api/pedidos',           { headers }),
+      fetch('http://localhost:3000/api/platos',            { headers }),
+      fetch('http://localhost:3000/api/usuarios/clientes', { headers }),
+    ])
+
+    if (resPedidos.ok)  pedidos.value  = await resPedidos.json()
+    if (resPlatos.ok)   platos.value   = await resPlatos.json()
+    if (resClientes.ok) clientes.value = await resClientes.json()
+
+    // normalizar si vienen dentro de una propiedad
+    if (!Array.isArray(pedidos.value))  pedidos.value  = pedidos.value?.pedidos  ?? pedidos.value?.data  ?? []
+    if (!Array.isArray(platos.value))   platos.value   = platos.value?.platos    ?? platos.value?.data   ?? []
+    if (!Array.isArray(clientes.value)) clientes.value = clientes.value?.clientes ?? clientes.value?.data ?? []
+
+  } catch (err) {
+    console.error('Error dashboard:', err)
+    error.value = 'No se pudieron cargar los datos. ¿Está el backend corriendo?'
+  } finally {
+    cargando.value = false
+  }
+}
+
+onMounted(() => {
+  emit('set-titulo', 'Dashboard')
+  cargarDatos()
+})
+
+// ── Stats calculadas ──────────────────────────────────
+const totalPedidos  = computed(() => pedidos.value.length)
+const totalClientes = computed(() => clientes.value.length)
+const totalPlatos   = computed(() => platos.value.length)
+const ingresoTotal  = computed(() => {
+  const suma = pedidos.value.reduce((acc, p) => acc + Number(p.total ?? 0), 0)
+  return `Bs. ${suma.toFixed(2)}`
+})
+
+const cards = computed(() => [
+  { icon: '📋', value: totalPedidos.value,  label: 'Pedidos totales' },
+  { icon: '👥', value: totalClientes.value, label: 'Clientes registrados' },
+  { icon: '🍽️', value: totalPlatos.value,  label: 'Platos en carta' },
+  { icon: '💰', value: ingresoTotal.value,  label: 'Ingresos totales' },
+])
+
+// Últimos 5 pedidos
+const pedidosRecientes = computed(() =>
+  [...pedidos.value]
+    .sort((a, b) => (b.nropedido ?? b.id ?? 0) - (a.nropedido ?? a.id ?? 0))
+    .slice(0, 5)
+)
+
+// Primeros 5 platos disponibles
+const platosTop = computed(() =>
+  platos.value.filter(p => p.disponibilidad !== false).slice(0, 5)
+)
 </script>
 
 <style scoped>
@@ -169,9 +239,9 @@ const platosTop = [
   font-weight: 600;
   text-transform: capitalize;
 }
-.badge.confirmado { background: rgba(68,2,14,0.4); color: var(--gold); border: 1px solid rgba(235,205,149,0.2); }
-.badge.pendiente  { background: rgba(180,120,0,0.2); color: #e8c96a; border: 1px solid rgba(220,180,0,0.2); }
-.badge.entregado  { background: rgba(30,80,40,0.3); color: #7ed4a0; border: 1px solid rgba(50,150,80,0.2); }
+.badge.confirmado { background: rgba(68,2,14,0.4);   color: var(--gold);  border: 1px solid rgba(235,205,149,0.2); }
+.badge.pendiente  { background: rgba(180,120,0,0.2); color: #e8c96a;      border: 1px solid rgba(220,180,0,0.2); }
+.badge.entregado  { background: rgba(30,80,40,0.3);  color: #7ed4a0;      border: 1px solid rgba(50,150,80,0.2); }
 
 .dash-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
 
@@ -185,21 +255,29 @@ const platosTop = [
 }
 
 .dash-list__rank {
-  width: 22px;
-  height: 22px;
+  width: 22px; height: 22px;
   background: var(--wine);
   color: var(--gold);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700;
   flex-shrink: 0;
 }
 
-.dash-list__name { flex: 1; color: var(--white); }
+.dash-list__name  { flex: 1; color: var(--white); }
 .dash-list__count { color: var(--gold-dim); font-size: 0.75rem; }
+
+.dash-cargando { color: var(--muted); font-style: italic; font-size: 0.85rem; }
+.dash-vacia    { color: var(--muted); font-style: italic; font-size: 0.82rem; padding: 1rem 0; }
+
+.dash-error {
+  background: rgba(120,20,20,0.2);
+  border: 1px solid rgba(180,40,40,0.3);
+  color: #f4a0a0;
+  padding: 0.8rem 1.2rem;
+  font-size: 0.85rem;
+  border-radius: 2px;
+}
 
 @media (max-width: 768px) {
   .dashboard__bottom { grid-template-columns: 1fr; }
