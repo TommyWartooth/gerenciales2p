@@ -1,6 +1,5 @@
 <template>
   <div class="inicio-recepcionista">
-    <!-- TOPBAR SUPERIOR -->
     <header class="recep-topbar">
       <div>
         <h1 class="recep-topbar-title">Panel de recepcionista</h1>
@@ -11,9 +10,7 @@
     </header>
 
     <div class="recep-layout">
-      <!-- SIDEBAR IZQUIERDO -->
       <aside class="recep-sidebar">
-        <!-- Info del recepcionista -->
         <div class="recep-profile">
           <div class="recep-avatar"></div>
           <div>
@@ -23,23 +20,7 @@
         </div>
 
         <nav class="recep-menu">
-          <RouterLink
-            to="/recepcionista/nuevo-pedido"
-            class="recep-menu-item"
-            active-class="recep-menu-item--active"
-          >
-            <span class="recep-menu-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M19 3H5a2 2 0 0 0-2 2v14l4-4h12a2 2 0 0 0 2-2V5a2 
-             2 0 0 0-2-2zm-4 9h-2v2h-2v-2H9V10h2V8h2v2h2v2z"
-                />
-              </svg>
-            </span>
-            <span class="recep-menu-text">Nuevo pedido</span>
-          </RouterLink>
-
+        
           <RouterLink
             to="/recepcionista/pedidos-pendientes"
             class="recep-menu-item"
@@ -83,6 +64,7 @@
             <span class="recep-menu-icon">🏠</span>
             <span class="recep-menu-text">Ver página principal</span>
           </button>
+          
           <button
             type="button"
             class="recep-menu-item recep-menu-item--logout"
@@ -94,9 +76,7 @@
         </nav>
       </aside>
 
-      <!-- PARTE DERECHA -->
       <div class="recep-main">
-        <!-- Franja de color vertical -->
         <div class="recep-color-strip"></div>
 
         <div class="recep-main-inner">
@@ -127,7 +107,6 @@ function logout() {
   router.push("/"); // lo mandamos al inicio o al login
 }
 </script>
-
 <style scoped>
 /* CONTENEDOR GENERAL */
 .inicio-recepcionista {

@@ -1,6 +1,5 @@
 <template>
   <section class="historial-container">
-    <!-- HEADER -->
     <header class="historial-header">
       <div>
         <h1 class="historial-title">Historial de pedidos</h1>
@@ -10,17 +9,15 @@
       </div>
 
       <div class="historial-filtros">
-        <!-- filtro estado -->
         <label class="filtro-label">
           Estado:
           <select v-model="filtroEstado">
             <option value="todos">Todos</option>
-            <option value="Hecho">Hechos</option>
-            <option value="Cancelado">Cancelados</option>
+            <option value="entregado">Entregados</option>
+            <option value="cancelado">Cancelados</option>
           </select>
         </label>
 
-        <!-- filtro texto -->
         <div class="filtro-busqueda">
           <input
             v-model="filtroTexto"
@@ -31,9 +28,7 @@
       </div>
     </header>
 
-    <!-- TABLA + DETALLE -->
     <div class="historial-layout">
-      <!-- IZQUIERDA: tabla -->
       <div class="tabla-wrapper">
         <table class="tabla-pedidos">
           <thead>
@@ -71,8 +66,8 @@
                 <span
                   class="badge-estado"
                   :class="{
-                    'badge-estado--finalizada': pedido.estado === 'Finalizada',
-                    'badge-estado--cancelada': pedido.estado === 'Cancelada',
+                    'badge-estado--finalizada': pedido.estado === 'entregado',
+                    'badge-estado--cancelada': pedido.estado === 'cancelado',
                   }"
                 >
                   {{ pedido.estado }}
@@ -101,7 +96,6 @@
         </table>
       </div>
 
-      <!-- DERECHA: detalle -->
       <aside class="detalle-wrapper">
         <div v-if="pedidoSeleccionado" class="detalle-card">
           <h2 class="detalle-title">Pedido #{{ pedidoSeleccionado.id }}</h2>
@@ -123,9 +117,9 @@
               class="badge-estado"
               :class="{
                 'badge-estado--finalizada':
-                  pedidoSeleccionado.estado === 'Finalizada',
+                  pedidoSeleccionado.estado === 'entregado',
                 'badge-estado--cancelada':
-                  pedidoSeleccionado.estado === 'Cancelada',
+                  pedidoSeleccionado.estado === 'cancelado',
               }"
             >
               {{ pedidoSeleccionado.estado }}
@@ -203,7 +197,7 @@ async function cargarHistorial() {
       nit: p.nit || "",
       razonSocial: p.razon_social || p.razonSocial || "",
       modalidad: p.modalidad,
-      estado: p.estado, // "Hecho" o "Cancelado"
+      estado: p.estado, // "entregado" o "cancelado"
       fecha: p.fecha,
       hora: p.hora,
       total: Number(p.total ?? 0),
@@ -220,7 +214,7 @@ async function cargarHistorial() {
 // ===============================
 const pedidosFiltrados = computed(() => {
   return pedidos.value
-    .filter((p) => p.estado === "Hecho" || p.estado === "Cancelado")
+    .filter((p) => p.estado === "entregado" || p.estado === "cancelado")
     .filter((p) => {
       if (filtroEstado.value === "todos") return true;
       return p.estado === filtroEstado.value;
@@ -283,7 +277,6 @@ async function verDetalles(pedidoResumen) {
 // cargar historial al entrar a la vista
 onMounted(cargarHistorial);
 </script>
-
 <style scoped>
 .historial-container {
   padding: 0.75rem 0.5rem 1.5rem;

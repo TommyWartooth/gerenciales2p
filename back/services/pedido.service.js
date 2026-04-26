@@ -330,13 +330,12 @@ export class PedidoService {
       client.release();
     }
   }
-
-  async getHistorial() {
+async getHistorial() {
     const { rows } = await pool.query(
       `
     SELECT
       p.nropedido                  AS id,
-      u.nombre                     AS cliente,
+      COALESCE(u.nombre, 'Sin registrar') AS cliente,
       uc.nit,
       uc.razon_social,
       m.nombre                     AS modalidad,
@@ -346,18 +345,20 @@ export class PedidoService {
       COALESCE(SUM(pp.cantidad * pl.costo_unitario), 0) AS total,
       p.comentarios
     FROM pedido p
-    JOIN usuario u               ON u.documento = p.documento
-    LEFT JOIN usuario_cliente uc ON uc.documento = p.documento
-    JOIN modalidad m             ON m.idmodalidad = p.idmodalidad
-    JOIN estadop ep              ON ep.idestadop = p.idestadop
-    JOIN pedido_plato pp         ON pp.nropedido = p.nropedido
-    JOIN plato pl                ON pl.idplato = pp.idplato
-    WHERE p.idestadop IN (4, 5)  -- 4 = Hecho, 5 = Cancelado
+    LEFT JOIN usuario u              ON u.documento = p.documento
+    LEFT JOIN usuario_cliente uc     ON uc.documento = p.documento
+    LEFT JOIN modalidad m            ON m.idmodalidad = p.idmodalidad
+    LEFT JOIN estadop ep             ON ep.idestadop = p.idestadop
+    LEFT JOIN pedido_plato pp        ON pp.nropedido = p.nropedido
+    LEFT JOIN plato pl               ON pl.idplato = pp.idplato
+    -- Aquí la magia: Buscamos por la palabra, no por el ID, así no falla
+    WHERE ep.nombre ILIKE 'entregado' OR ep.nombre ILIKE 'cancelado' 
+       OR p.idestadop IN (4, 5)
     GROUP BY 
       p.nropedido, u.nombre, uc.nit, uc.razon_social,
       m.nombre, ep.nombre, fecha, hora, p.comentarios
     ORDER BY p.fecha_hora_pedido DESC;
-    `,
+    `
     );
 
     return rows;

@@ -1,8 +1,6 @@
 <template>
   <section class="datos-layout">
-    <!-- COLUMNA IZQUIERDA: DATOS DEL CLIENTE / ENTREGA -->
     <div class="datos-col-izq">
-      <!-- CONTACTO -->
       <div class="datos-card">
         <header class="datos-card-header">
           <div class="datos-card-titulo">
@@ -12,7 +10,6 @@
         </header>
 
         <div class="datos-card-body">
-          <!-- Resumen cuando está colapsado -->
           <template v-if="seccionActiva !== 'contacto'">
             <p
               v-if="contacto.nombre || contacto.apellido"
@@ -39,7 +36,6 @@
             </p>
           </template>
 
-          <!-- Form cuando está en edición -->
           <form
             v-else
             class="datos-form-grid"
@@ -104,7 +100,7 @@
           </form>
         </div>
       </div>
-      <!-- DETALLES DE FACTURACIÓN -->
+      
       <div class="datos-card">
         <header class="datos-card-header">
           <div class="datos-card-titulo">
@@ -116,7 +112,6 @@
         </header>
 
         <div class="datos-card-body">
-          <!-- Resumen -->
           <template v-if="seccionActiva !== 'facturacion'">
             <p class="datos-resumen">
               <strong>
@@ -145,7 +140,6 @@
             </p>
           </template>
 
-          <!-- Form -->
           <form
             v-else
             class="datos-form-col"
@@ -160,7 +154,6 @@
               </select>
             </div>
 
-            <!-- Solo pedir texto si NO es "sin" -->
             <div
               class="campo"
               v-if="facturacion.tipo === 'nit' || facturacion.tipo === 'ci'"
@@ -204,7 +197,6 @@
         </div>
       </div>
 
-      <!-- TIPO DE PEDIDO / DIRECCIÓN -->
       <div class="datos-card">
         <header class="datos-card-header">
           <div class="datos-card-titulo">
@@ -214,7 +206,6 @@
         </header>
 
         <div class="datos-card-body">
-          <!-- Resumen -->
           <template v-if="seccionActiva !== 'pedido'">
             <p class="datos-resumen">
               <strong>
@@ -253,13 +244,11 @@
             </p>
           </template>
 
-          <!-- Form -->
           <form
             v-else
             class="datos-form-col"
             @submit.prevent="guardarSeccion('pedido')"
           >
-            <!-- opciones de tipo de pedido -->
             <div class="grupo-opciones">
               <label class="radio-row">
                 <input type="radio" value="domicilio" v-model="tipoPedido" />
@@ -271,7 +260,6 @@
               </label>
             </div>
 
-            <!-- Si es domicilio, mostrar dirección -->
             <div v-if="tipoPedido === 'domicilio'" class="subcard">
               <div class="campo">
                 <label class="campo-label">
@@ -328,7 +316,6 @@
         </div>
       </div>
 
-      <!-- TIPO DE PAGO -->
       <div class="datos-card">
         <header class="datos-card-header">
           <div class="datos-card-titulo">
@@ -338,7 +325,6 @@
         </header>
 
         <div class="datos-card-body">
-          <!-- Resumen -->
           <template v-if="seccionActiva !== 'pago'">
             <p v-if="metodosPagoSeleccionados.length" class="datos-resumen">
               {{ metodosPagoSeleccionados.join(" / ") }}
@@ -348,7 +334,6 @@
             </p>
           </template>
 
-          <!-- Form -->
           <form
             v-else
             class="datos-form-col"
@@ -377,7 +362,6 @@
         </div>
       </div>
 
-      <!-- BOTÓN FINAL -->
       <div class="datos-footer">
         <button
           class="btn-confirmar"
@@ -389,7 +373,6 @@
       </div>
     </div>
 
-    <!-- COLUMNA DERECHA: RESUMEN DEL CARRITO -->
     <aside class="datos-col-der">
       <div class="resumen-card">
         <h3 class="section-title">Resumen del pedido</h3>
@@ -489,6 +472,7 @@ onMounted(() => {
     facturacion.razonSocial = u.razon_social || "";
   }
 });
+
 function construirComentarioPedido(carrito) {
   return (carrito || [])
     .filter((i) => i.comentario && i.comentario.trim())
@@ -505,7 +489,6 @@ function cancelarEdicion() {
 }
 
 function guardarSeccion(seccion) {
-  
   seccionActiva.value = null;
 }
 
@@ -544,17 +527,18 @@ async function confirmarDatos() {
 
     if (tipoPedido.value === "domicilio" && !direccionFinal) {
       alert("Para pedido a domicilio debes ingresar una dirección.");
+      procesando.value = false;
       return;
     }
+    
     const comentarioPedido = construirComentarioPedido(props.carrito);
 
     const bodyPedido = {
       comentarios: comentarioPedido || null,
-
       idmodalidad,
-      idestadop: 1,
+      idestadop: 2, // 👉 ¡CORREGIDO! Estaba en 1 (Cancelado). Ahora es 2 (Aceptado/Pendiente).
       direccion: direccionFinal, 
-      documento: auth.usuario.documento,
+      documento: auth.usuario?.documento || null, // 👉 Previene que falle si el usuario no tiene documento
       platos: (props.carrito || []).map((item) => ({
         idplato: item.id,
         cantidad: item.cantidad,
@@ -564,13 +548,24 @@ async function confirmarDatos() {
     console.log("=== BODY QUE SE ENVÍA A /api/pedidos ===");
     console.log(bodyPedido);
 
-    const resp = await fetch("http://localhost:3000/api/pedidos", {
+    // 👉 ¡CORREGIDO! Usamos la ruta relativa para que aproveche el proxy (como hacen tus peticiones GET)
+    const resp = await fetch("/api/pedidos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(bodyPedido),
     });
 
-    const data = await resp.json();
+    // 👉 ¡CORREGIDO! Validación estricta para evitar el crash del `<!DOCTYPE html>`
+    let data;
+    const contentType = resp.headers.get("content-type");
+    
+    if (contentType && contentType.includes("application/json")) {
+      data = await resp.json();
+    } else {
+      const textError = await resp.text();
+      console.error("El servidor devolvió un error HTML:", textError);
+      throw new Error("El servidor falló inesperadamente (revisa la terminal de tu backend).");
+    }
 
     if (!resp.ok) {
       throw new Error(data.message || data.error || "Error al crear el pedido");
@@ -591,7 +586,6 @@ async function confirmarDatos() {
   }
 }
 </script>
-
 <style scoped>
 .datos-layout {
   display: grid;

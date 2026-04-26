@@ -1,6 +1,5 @@
 <template>
   <section class="pendientes-container">
-    <!-- HEADER SUPERIOR -->
     <header class="pendientes-header">
       <div>
         <h1 class="pendientes-title">Pedidos pendientes</h1>
@@ -11,9 +10,7 @@
       <span class="badge-pedidos"> {{ pedidos.length }} pedidos </span>
     </header>
 
-    <!-- CUERPO PRINCIPAL: lista izquierda + detalle derecha -->
     <div class="pendientes-layout">
-      <!-- IZQUIERDA: lista de pedidos -->
       <section class="pendientes-lista">
         <div v-for="pedido in pedidos" :key="pedido.id" class="pendiente-card">
           <div class="pendiente-header">
@@ -61,7 +58,6 @@
               </option>
             </select>
 
-            <!-- Botón que realmente aplica el cambio -->
             <button class="btn-hecho" @click="confirmarEstado(pedido)">
               Confirmar estado
             </button>
@@ -73,7 +69,6 @@
         <template v-if="pedidoSeleccionado">
           <h3 class="detalle-title">Pedido #{{ pedidoSeleccionado.id }}</h3>
 
-          <!-- Items -->
           <div class="detalle-items">
             <div
               v-for="item in pedidoSeleccionado.items"
@@ -90,7 +85,6 @@
             </div>
           </div>
 
-          <!-- ESTADO (solo texto) -->
           <div class="campo">
             <label>Estado:</label>
             <span class="campo-span">
@@ -148,16 +142,15 @@
     </div>
   </section>
 </template>
+
 <script setup>
 import { ref, onMounted } from "vue";
 
 // Estados según la BD
 const opcionesEstado = [
-  { id: 1, label: "Pendiente" },
-  { id: 2, label: "Confirmado" },
-  { id: 3, label: "En preparación" },
-  { id: 4, label: "Hecho" },
-  { id: 5, label: "Cancelado" },
+  { id: 1, label: "Cancelado" },
+  { id: 2, label: "Aceptado" },
+  { id: 3, label: "Entregado" },
 ];
 
 function labelEstado(id) {
@@ -195,12 +188,12 @@ function verDetalles(pedido) {
 }
 
 async function aceptarPedido(pedido) {
-  pedido.estadoPropuestoId = 2;
+  pedido.estadoPropuestoId = 2; // 2 = Aceptado
   await confirmarEstado(pedido);
 }
 
 async function rechazarPedido(pedido) {
-  pedido.estadoPropuestoId = 5;
+  pedido.estadoPropuestoId = 1; // 1 = Cancelado (Antes tenías 5)
   await confirmarEstado(pedido);
 }
 
@@ -215,16 +208,10 @@ async function confirmarEstado(pedido) {
     });
 
     let body = null;
-    try {
-      body = await res.json();
-    } catch (_) {}
-
-    console.log("PATCH estado →", res.status, body);
+    try { body = await res.json(); } catch (_) {}
 
     if (!res.ok) {
-      const msg =
-        (body && body.message) ||
-        `Error ${res.status} al actualizar el estado del pedido`;
+      const msg = (body && body.message) || `Error ${res.status} al actualizar el estado`;
       alert(msg);
       return;
     }
@@ -232,25 +219,22 @@ async function confirmarEstado(pedido) {
     pedido.idestadop = body.idestadop;
     pedido.estado = body.estado || labelEstado(body.idestadop);
 
-    if (nuevoEstado === 4 || nuevoEstado === 5) {
+    // 👉 LA MAGIA: Si el nuevo estado es Cancelado (1) o Entregado (3), lo sacamos de pendientes
+    if (nuevoEstado === 1 || nuevoEstado === 3) {
       pedidos.value = pedidos.value.filter((p) => p.id !== pedido.id);
-
+      
+      // Si el pedido que acabamos de sacar estaba seleccionado, limpiamos el panel derecho
       if (pedidoSeleccionado.value?.id === pedido.id) {
         pedidoSeleccionado.value = null;
       }
-      return;
+      return; 
     }
 
-    if (nuevoEstado === 3) {
-      const correo = {
-        correo: pedido.correoCliente,
-        asunto: "Tu pedido está en preparación",
-        mensaje: `Hola ${pedido.cliente}, tu pedido #${pedido.id} se está preparando.`,
-      };
-      console.log("Correo generado:", correo);
+    // Si solo lo aceptó (2), se queda en la lista, pero tal vez quieras enviar correo
+    if (nuevoEstado === 2) {
+      console.log(`Pedido ${pedido.id} aceptado. Sigue en preparación.`);
     }
 
-    console.log("Estado actualizado OK:", pedido);
   } catch (err) {
     console.error("Error PATCH estado:", err);
     alert("No se pudo actualizar el estado del pedido");
@@ -259,7 +243,6 @@ async function confirmarEstado(pedido) {
 
 onMounted(() => cargarPedidos());
 </script>
-
 <style scoped>
 .pendientes-container {
   padding: 0.75rem 0.5rem 1.5rem;

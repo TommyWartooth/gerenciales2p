@@ -25,7 +25,6 @@
     </header>
 
     <div v-if="pasoActual === 'pedido'" class="pedido-layout">
-      <!-- IZQUIERDA: MENÚ -->
       <section class="pedido-menu">
         <nav class="menu-tabs">
           <button
@@ -58,7 +57,6 @@
           </button>
         </nav>
 
-        <!-- Secciones -->
         <EntradasSection
           v-if="seccionActiva === 'entradas'"
           @seleccionar-item="seleccionarDesdeSeccion"
@@ -77,11 +75,9 @@
         />
       </section>
 
-      <!-- DERECHA: DETALLE DEL PEDIDO -->
       <aside class="pedido-detalle">
         <h3>Detalle</h3>
 
-        <!-- Configuración del ítem -->
         <div class="box">
           <template v-if="itemSeleccionado">
             <div class="item-config">
@@ -116,7 +112,6 @@
           </p>
         </div>
 
-        <!-- RESUMEN -->
         <div class="box">
           <h4>Resumen del pedido</h4>
 
@@ -187,7 +182,7 @@ function eliminarDelCarrito(id) {
   carrito.value = carrito.value.filter((it) => it.id !== id);
 }
 
-/* Fusionar items repetidos por id (misma lógica que en App.vue) */
+/* Fusionar items repetidos por id */
 function confirmarItem() {
   if (!itemSeleccionado.value) return;
   const b = itemSeleccionado.value;
@@ -215,14 +210,16 @@ function confirmarItem() {
     carrito.value.push(nuevoItem);
   }
 }
+
 async function manejarGuardarDatos(datosClienteYEntrega) {
   if (!carrito.value.length) {
     console.warn("No hay ítems en el carrito");
     return;
   }
 
-  if (ultimoPedidoEnviado.value) {
-    console.warn("Pedido ya fue enviado, bloqueo duplicado");
+  // Evitamos doble clic accidental
+  if (cargando.value) {
+    console.warn("El pedido ya se está enviando...");
     return;
   }
 
@@ -248,20 +245,26 @@ async function manejarGuardarDatos(datosClienteYEntrega) {
 
   const idmesaFinal = pedido.mesa ? Number(pedido.mesa) || null : null;
 
+  // Payload completo con toda la info para que se vea bien en el panel de PENDIENTES
   const payload = {
+    cliente: pedido.nombre || pedido.cliente || "Cliente Presencial", 
+    modalidad: pedido.modalidad || "Local", 
+    direccion: pedido.direccion || null,
     nit: nitFinal,
     razonsocial: razonSocialFinal,
     idmesa: idmesaFinal,
-    notas: pedido.notas || "",
+    comentarios: pedido.notas || "",
     platos: carrito.value.map((item) => ({
       idplato: item.id,
       cantidad: item.cantidad,
+      detalle: item.comentario || "", // Comentario individual por ítem
     })),
   };
 
-  console.log("Payload a enviar a /api/ordenes:", payload);
+  console.log("Payload a enviar a /api/pedidos:", payload);
 
   try {
+    // Si tu ruta backend es /api/ordenes en vez de pedidos, cámbialo aquí abajo
     const resp = await fetch("/api/pedidos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -279,7 +282,8 @@ async function manejarGuardarDatos(datosClienteYEntrega) {
     const ordenCreada = await resp.json();
     console.log("ORDEN CREADA EN BD:", ordenCreada);
 
-    ultimoPedidoEnviado.value = ordenCreada.idorden ?? true;
+    // Reseteamos todo para permitir tomar un nuevo pedido inmediatamente
+    ultimoPedidoEnviado.value = null; 
     carrito.value = [];
     itemSeleccionado.value = null;
     pasoActual.value = "pedido";
