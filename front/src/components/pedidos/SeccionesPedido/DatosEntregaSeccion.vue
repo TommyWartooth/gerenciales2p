@@ -534,7 +534,7 @@ async function confirmarDatos() {
     const comentarioPedido = construirComentarioPedido(props.carrito);
 
     const bodyPedido = {
-      comentarios: comentarioPedido || null,
+      comentarios: comentarioPedido || "Sin comentarios",
       idmodalidad,
       idestadop: 2, // 👉 ¡CORREGIDO! Estaba en 1 (Cancelado). Ahora es 2 (Aceptado/Pendiente).
       direccion: direccionFinal, 
@@ -572,7 +572,7 @@ async function confirmarDatos() {
     }
 
     console.log("✅ Pedido creado en backend:", data);
-    alert("¡Pedido creado correctamente!");
+    //alert("¡Pedido creado correctamente!");
 
     emit("guardar-datos", {
       ...payload,
