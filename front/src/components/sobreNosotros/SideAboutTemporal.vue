@@ -27,7 +27,10 @@
             <div class="about-card__icon"></div>
             <h3 class="about-card__title">Nuestra Misión</h3>
             <p class="about-card__p">
-              Nuestra misión es honrar las raíces de la gastronomía boliviana a través de las manos del Taita, rescatando sabores ancestrales y recetas tradicionales para ofrecer una experiencia auténtica, generosa y llena de identidad que alimente el ajayu de nuestros comensales.
+            
+Nuestra misión es ofrecer comida boliviana basada en recetas tradicionales, preparada con respeto a su origen y con ingredientes de calidad. Buscamos brindar una experiencia clara y consistente, donde el cliente encuentre sabores conocidos, buen servicio y un ambiente adecuado para compartir.
+
+
             </p>
           </div>
 
@@ -35,7 +38,10 @@
             <div class="about-card__icon"></div>
             <h3 class="about-card__title">Nuestra Visión</h3>
             <p class="about-card__p">
-              Convertirnos en el referente principal de la gastronomía boliviana a nivel nacional, siendo reconocidos por preservar los sabores ancestrales y por nuestra innovación en el servicio, logrando que cada visita a 'El Taitita del Sabor' sea un homenaje vivo a nuestra identidad boliviana.
+            
+Ser un referente de la gastronomía boliviana a nivel nacional, reconocido por la calidad en la preparación de platos tradicionales y por un servicio consistente. Buscamos consolidarnos como una opción confiable para quienes valoran la cocina del país, manteniendo el uso de ingredientes locales y respetando las recetas que forman parte de nuestra cultura gastronómica.
+
+
             </p>
           </div>
 

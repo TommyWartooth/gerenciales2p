@@ -213,7 +213,7 @@ const generarPDF = () => {
 
   // Descargar el archivo
   doc.save(`Reporte_Dashboard_${fecha.replace(/\//g, '-')}.pdf`)
-}
+} 
 </script>
 
 <style scoped>
