@@ -17,7 +17,6 @@
           :class="{ 'no-disponible': entrada.noDisponible }"
         >
           <div class="tooltip">
-            <!-- ✅ tooltip funcional -->
             <img
               :src="entrada.imagen"
               :alt="entrada.nombre"

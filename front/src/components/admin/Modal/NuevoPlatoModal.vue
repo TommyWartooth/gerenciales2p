@@ -14,7 +14,7 @@
           </div>
 
           <div class="campo">
-            <label>Costo unitario (S/.)</label>
+            <label>Costo unitario (bs)</label>
             <input
               v-model.number="costoUnitario"
               type="number"
@@ -58,7 +58,6 @@
           <textarea v-model="descripcion" rows="3"></textarea>
         </div>
 
-        <!-- IMAGEN -->
         <div class="campo">
           <label>Imagen del plato</label>
           <div class="imagen-input-row">
@@ -69,12 +68,10 @@
             />
           </div>
 
-          <!-- Vista previa -->
           <div v-if="previewUrl" class="imagen-preview">
             <img :src="previewUrl" alt="Vista previa del plato" />
           </div>
 
-          <!-- Mostrar ruta generada -->
           <p v-if="imagen" class="ruta-texto">
             Ruta guardada: <code>{{ imagen }}</code>
           </p>
@@ -94,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 const props = defineProps({
   categorias: {
@@ -112,9 +109,26 @@ const descripcion = ref("");
 const disponibilidad = ref(true);
 const idcategoria = ref("");
 
-// Imagen (solo guardamos la ruta relativa como string)
-const imagen = ref(""); // ejemplo: "/imagenes/platos/ceviche.jpg"
+// Variables para la imagen
+const nombreArchivo = ref("");
 const previewUrl = ref(null);
+
+// Propiedad computada: Construye la ruta de la imagen leyendo el nombre de la categoría
+const imagen = computed(() => {
+  if (!nombreArchivo.value) return "";
+  
+  // ¡AQUÍ ESTÁ EL TRUCO! Comparamos convirtiendo ambos a texto
+  const categoriaSeleccionada = props.categorias.find((c) => 
+    String(c.idcategoria) === String(idcategoria.value)
+  );
+  
+  let carpeta = "platos";
+  if (categoriaSeleccionada && categoriaSeleccionada.nombre) {
+    carpeta = categoriaSeleccionada.nombre.toLowerCase().replace(/\s+/g, '-');
+  }
+  
+  return `/imagenes/${carpeta}/${nombreArchivo.value}`;
+});
 
 function cerrar() {
   emit("cerrar");
@@ -124,18 +138,16 @@ function onArchivoSeleccionado(event) {
   const file = event.target.files[0];
 
   if (!file) {
-    imagen.value = "";
+    nombreArchivo.value = "";
     previewUrl.value = null;
     return;
   }
 
-  // Nombre del archivo
-  const fileName = file.name;
-
-  // Ruta relativa que guardarás en tu BD o mock
-  imagen.value = `/imagenes/platos/${fileName}`;
-
-  // Preview temporal
+  // Limpiamos el nombre: Minúsculas, sin "ñ", sin espacios
+  let fileName = file.name;
+  fileName = fileName.toLowerCase().replace(/ñ/g, 'n').replace(/\s+/g, '-');
+  
+  nombreArchivo.value = fileName;
   previewUrl.value = URL.createObjectURL(file);
 }
 
@@ -151,12 +163,8 @@ function guardar() {
     descripcion: descripcion.value,
     disponibilidad: disponibilidad.value,
     idcategoria: Number(idcategoria.value),
-
-    // tipo (texto)
-    tipo: props.categorias.find((c) => c.idcategoria === idcategoria.value)
-      ?.nombre,
-
-    // ruta relativa de la imagen
+    tipo: props.categorias.find((c) => c.idcategoria === idcategoria.value)?.nombre,
+    // ruta final de la imagen
     imagen: imagen.value || null,
   });
 }

@@ -2,7 +2,6 @@
   <div class="admin-page">
     <div class="admin-page__toolbar">
       <input v-model="busqueda" class="admin-input-search" placeholder="Buscar plato..." />
-      <!-- FILTRO CATEGORÍA -->
       <select v-model="filtroCategoria" class="admin-input-search">
         <option :value="0">Todas las categorías</option>
         <option v-for="c in categorias" :key="c.idcategoria" :value="c.idcategoria">
@@ -52,7 +51,6 @@
       </table>
     </div>
 
-    <!-- MODAL NUEVO -->
     <div v-if="mostrarNuevo" class="modal-backdrop" @click.self="mostrarNuevo = false">
       <div class="modal">
         <header class="modal-header">
@@ -112,7 +110,6 @@
       </div>
     </div>
 
-    <!-- MODAL EDITAR -->
     <div v-if="platoEditando" class="modal-backdrop" @click.self="platoEditando = null">
       <div class="modal">
         <header class="modal-header">
@@ -154,7 +151,6 @@
             <label>Descripción</label>
             <textarea v-model="formEditar.descripcion" rows="3"></textarea>
           </div>
-          <!-- IMAGEN EN EDITAR -->
           <div class="campo">
             <label>Imagen</label>
             <div class="imagen-input-row">
@@ -188,12 +184,12 @@ const platos = ref([])
 
 const categorias = ref([
   { idcategoria: 1, nombre: "Bebidas" },
-  { idcategoria: 2, nombre: "Platos fuertes" },
-  { idcategoria: 3, nombre: "Entradas" },
+  { idcategoria: 2, nombre: "Entradas" },
+  { idcategoria: 3, nombre: "Platos fuertes" },
   { idcategoria: 4, nombre: "Postres" },
 ])
 
-//PLATOS
+// PLATOS
 async function cargarPlatos() {
   try {
     const token = localStorage.getItem('token')
@@ -221,7 +217,6 @@ async function cargarPlatos() {
       disponibilidad: p.disponibilidad,
       idcategoria: p.idcategoria,
       imagen: p.imagen,
-      
       puede_borrarse: p.puede_borrarse 
     }))
   } catch (err) {
@@ -258,10 +253,23 @@ const formEditar = reactive({
 
 
 const guardarNuevo = async () => {
-  if (!form.nombre || !form.costo_unitario) {
+  if (!form.nombre || !form.costo_unitario || !form.idcategoria) {
     alert('Completa los campos obligatorios')
     return
   }
+
+  // ARMAMOS LA RUTA DINÁMICA JUSTO ANTES DE GUARDAR
+  if (form.imagen && !form.imagen.startsWith('/imagenes/')) {
+    const nombreArchivo = form.imagen.split('/').pop();
+    const cat = categorias.value.find(c => String(c.idcategoria) === String(form.idcategoria));
+    let carpeta = (cat && cat.nombre) ? cat.nombre.toLowerCase().replace(/ñ/g, 'n').replace(/\s+/g, '-') : 'platos';
+    
+    // Si la carpeta es "platos-fuertes", usamos "platos" que es la carpeta real en el servidor
+    if (carpeta === 'platos-fuertes') carpeta = 'platos';
+    
+    form.imagen = `/imagenes/${carpeta}/${nombreArchivo}`;
+  }
+
   try {
     const token = localStorage.getItem('token')
     const resp = await fetch("http://localhost:3000/api/platos", {
@@ -292,6 +300,18 @@ const abrirEditar = (p) => {
 }
 
 const guardarEditar = async () => {
+  // ARMAMOS LA RUTA DINÁMICA PARA EDITAR (Solo si subió foto nueva)
+  if (formEditar.imagen && formEditar.previewUrl) { 
+    const nombreArchivo = formEditar.imagen.split('/').pop();
+    const cat = categorias.value.find(c => String(c.idcategoria) === String(formEditar.idcategoria));
+    let carpeta = (cat && cat.nombre) ? cat.nombre.toLowerCase().replace(/ñ/g, 'n').replace(/\s+/g, '-') : 'platos';
+    
+    // Si la carpeta es "platos-fuertes", usamos "platos" que es la carpeta real en el servidor
+    if (carpeta === 'platos-fuertes') carpeta = 'platos';
+    
+    formEditar.imagen = `/imagenes/${carpeta}/${nombreArchivo}`;
+  }
+
   try {
     const id = formEditar.id_plato
     const token = localStorage.getItem('token')
@@ -343,21 +363,23 @@ const platosFiltrados = computed(() =>
   })
 )
 
+// LIMPIAMOS EL NOMBRE DEL ARCHIVO Y CREAMOS PREVIEW
 const onFoto = (e) => {
   const file = e.target.files[0]
   if (!file) return
-  form.imagen = `/imagenes/platos/${file.name}`
+  const nombreLimpio = file.name.toLowerCase().replace(/ñ/g, 'n').replace(/\s+/g, '-');
+  form.imagen = nombreLimpio; 
   form.previewUrl = URL.createObjectURL(file)
 }
 
 const onFotoEditar = (e) => {
   const file = e.target.files[0]
   if (!file) return
-  formEditar.imagen = `/imagenes/platos/${file.name}`
+  const nombreLimpio = file.name.toLowerCase().replace(/ñ/g, 'n').replace(/\s+/g, '-');
+  formEditar.imagen = nombreLimpio; 
   formEditar.previewUrl = URL.createObjectURL(file)
 }
 </script>
-
 <style scoped>
 .imagen-input-row {
   padding: 0.8rem 1rem;

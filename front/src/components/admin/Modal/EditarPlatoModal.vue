@@ -14,7 +14,7 @@
           </div>
 
           <div class="campo">
-            <label>Costo unitario (S/.)</label>
+            <label>Costo unitario (bs)</label>
             <input
               v-model.number="costoUnitario"
               type="number"
@@ -56,11 +56,9 @@
           <textarea v-model="descripcion" rows="3"></textarea>
         </div>
 
-        <!-- IMAGEN -->
         <div class="campo">
           <label>Imagen del plato</label>
 
-          <!-- Input archivo -->
           <div class="imagen-input-row">
             <input
               type="file"
@@ -69,14 +67,12 @@
             />
           </div>
 
-          <!-- Preview (si hay algo que mostrar) -->
           <div v-if="previewUrl" class="imagen-preview">
             <img :src="previewUrl" alt="Vista previa del plato" />
           </div>
 
-          <!-- Ruta actual/actualizada -->
-          <p v-if="imagen" class="ruta-texto">
-            Ruta guardada: <code>{{ imagen }}</code>
+          <p v-if="imagenCalculada" class="ruta-texto">
+            Ruta guardada: <code>{{ imagenCalculada }}</code>
           </p>
         </div>
       </section>
@@ -94,7 +90,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 const props = defineProps({
   plato: {
@@ -123,9 +119,32 @@ const disponibilidad = ref(
 );
 const idcategoria = ref(props.plato.idcategoria ?? "");
 
-const imagen = ref(props.plato.imagen || ""); // ej: "/imagenes/platos/lomo_saltado.jpg"
-const previewUrl = ref(imagen.value || null); // si ya hay imagen, la mostramos
+// Variables para la imagen
+const archivoNuevo = ref(""); 
+const previewUrl = ref(props.plato.imagen || null);
 
+const imagenCalculada = computed(() => {
+  // ¡EL MISMO TRUCO AQUÍ!
+  const categoriaSeleccionada = props.categorias.find((c) => 
+    String(c.idcategoria) === String(idcategoria.value)
+  );
+  
+  let carpeta = "platos";
+  if (categoriaSeleccionada && categoriaSeleccionada.nombre) {
+    carpeta = categoriaSeleccionada.nombre.toLowerCase().replace(/\s+/g, '-');
+  }
+
+  if (archivoNuevo.value) {
+    return `/imagenes/${carpeta}/${archivoNuevo.value}`;
+  }
+  
+  if (props.plato.imagen) {
+    const nombreArchivoViejo = props.plato.imagen.split('/').pop();
+    return `/imagenes/${carpeta}/${nombreArchivoViejo}`;
+  }
+
+  return "";
+});
 function cerrar() {
   emit("cerrar");
 }
@@ -134,13 +153,16 @@ function onArchivoSeleccionado(event) {
   const file = event.target.files[0];
 
   if (!file) {
+    archivoNuevo.value = "";
+    previewUrl.value = props.plato.imagen || null;
     return;
   }
 
-  const fileName = file.name;
+  // Limpieza del nombre de archivo
+  let fileName = file.name;
+  fileName = fileName.toLowerCase().replace(/ñ/g, 'n').replace(/\s+/g, '-');
 
-  imagen.value = `/imagenes/platos/${fileName}`;
-
+  archivoNuevo.value = fileName;
   previewUrl.value = URL.createObjectURL(file);
 }
 
@@ -158,9 +180,8 @@ function guardarCambios() {
     descripcion: descripcion.value,
     disponibilidad: !!disponibilidad.value,
     idcategoria: Number(idcategoria.value),
-
-    // imagen (la original o la nueva si se cambió)
-    imagen: imagen.value || null,
+    // Mandamos la imagen calculada
+    imagen: imagenCalculada.value || null,
   };
 
   console.log("🍽 PLATO ACTUALIZADO:", actualizado);
